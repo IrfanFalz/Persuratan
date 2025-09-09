@@ -33,6 +33,8 @@ Route::middleware('checkRole:KEPSEK')->post('/dashboard/kepsek/approval', [Dashb
 // Form Surat
 Route::middleware('checkRole:GURU')->get('/form-surat', [FormSuratController::class, 'index'])->name('form.surat');
 Route::middleware('checkRole:GURU')->post('/form-surat', [FormSuratController::class, 'submit']);
+Route::middleware('checkRole:GURU')->get('/guru-data', [FormSuratController::class, 'getGuruData'])->name('guru.data');
+Route::middleware('checkRole:GURU')->get('/siswa-data', [FormSuratController::class, 'getSiswaData'])->name('siswa.data');
 
 // ================== LOGOUT ==================
 Route::get('/logout', function () {

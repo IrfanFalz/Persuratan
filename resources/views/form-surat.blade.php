@@ -62,6 +62,21 @@
                     min-width: 44px;
                 }
             }
+            /* Autocomplete dropdown styling */
+            #autocomplete-dropdown {
+                border-top: none;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+
+            #autocomplete-dropdown div:hover {
+                background-color: #f3f4f6;
+            }
+
+            /* Prevent dropdown from being cut off */
+            .relative {
+                position: relative;
+            }
         </style>
     </head>
     <body class="bg-gray-50 min-h-screen">
@@ -138,35 +153,29 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                                <input type="text" placeholder="Nama Lengkap"
-                                    class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm sm:text-base">
+                                <div class="relative">
+                                    <input type="text" id="nama-input" name="nama" placeholder="Ketik nama guru..." required
+                                        class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                                        autocomplete="off">
+                                    <button type="button" id="search-guru-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <!-- Dropdown Autocomplete -->
+                                    <div id="autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                                    </div>
+                                </div>
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">NIP</label>
-                                <input type="text" name="nip" placeholder="Masukkan NIP" required
-                                    class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                <div class="relative">
+                                    <input type="text" id="nip-input" name="nip" placeholder="NIP akan terisi otomatis" required readonly
+                                        class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
+                                    <button type="button" id="search-guru-btn-2" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Mata Pelajaran</label>
-                                <select name="mapel" required
-                                        class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                    <option value="">Pilih Mata Pelajaran</option>
-                                    <option value="Matematika">Matematika</option>
-                                    <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                                    <option value="Bahasa Inggris">Bahasa Inggris</option>
-                                    <option value="Fisika">Fisika</option>
-                                    <option value="Kimia">Kimia</option>
-                                    <option value="Biologi">Biologi</option>
-                                    <option value="Sejarah">Sejarah</option>
-                                    <option value="Geografi">Geografi</option>
-                                    <option value="Ekonomi">Ekonomi</option>
-                                    <option value="Sosiologi">Sosiologi</option>
-                                    <option value="PKN">PKN</option>
-                                    <option value="Agama">Agama</option>
-                                    <option value="Olahraga">Olahraga</option>
-                                    <option value="Seni Budaya">Seni Budaya</option>
-                                </select>
-                            </div>
+                            
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">No. Telepon</label>
                                 <input type="tel" name="phone" placeholder="Masukkan nomor telepon" required
@@ -214,15 +223,16 @@
                                     <h4 class="text-sm font-medium text-gray-700">Data Guru (Nama, NIP, Keterangan)</h4>
                                     <div id="guru-container" class="space-y-4">
                                         <div class="guru-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
-                                            <div class="space-y-1">
+                                            <div class="space-y-1 relative">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Nama Guru</label>
-                                                <input type="text" name="nama[]" placeholder="Nama Guru" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="nama[]" placeholder="Ketik nama guru..." required autocomplete="off"
+                                                    class="guru-nama-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <div class="guru-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
-                                                <input type="text" name="nip[]" placeholder="NIP" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="nip[]" placeholder="NIP akan terisi otomatis" required readonly
+                                                    class="guru-nip-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Keterangan</label>
@@ -276,20 +286,21 @@
                                     <h4 class="text-sm font-medium text-gray-700">Data Siswa (Nama, NISN, Kelas)</h4>
                                     <div id="siswa-dispensasi-container" class="space-y-4">
                                         <div class="siswa-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
-                                            <div class="space-y-1">
+                                            <div class="space-y-1 relative">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                                                <input type="text" name="nama[]" placeholder="Nama Siswa" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="nama[]" placeholder="Ketik nama siswa..." required autocomplete="off"
+                                                    class="siswa-nama-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <div class="siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">NISN</label>
-                                                <input type="text" name="nisn[]" placeholder="NISN" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="nisn[]" placeholder="NISN akan terisi otomatis" required readonly
+                                                    class="siswa-nisn-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                                                <input type="text" name="kelas[]" placeholder="Kelas" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="kelas[]" placeholder="Kelas akan terisi otomatis" required readonly
+                                                    class="siswa-kelas-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                             </div>
                                         </div>
                                     </div>
@@ -337,10 +348,11 @@
                                 <div class="space-y-4">
                                     <h4 class="text-sm font-medium text-gray-700">Guru yang Ditemui</h4>
                                     <div id="guru-ditemui-container" class="space-y-4">
-                                        <div class="guru-ditemui-row p-4 bg-gray-50 rounded-lg">
-                                            <input type="text" name="guru_ditemui[]" placeholder="Nama Guru yang Ditemui" required
-                                                class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                        </div>
+                                        <div class="guru-ditemui-row p-4 bg-gray-50 rounded-lg relative">
+                                        <input type="text" name="guru_ditemui[]" placeholder="Ketik nama guru..." required autocomplete="off"
+                                            class="guru-ditemui-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                        <div class="guru-ditemui-dropdown hidden absolute top-full left-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
+                                    </div>
                                     </div>
                                     <button type="button" id="add-guru-ditemui" class="w-full sm:w-auto px-4 py-2 text-blue-600 hover:text-blue-900 border border-blue-300 rounded-lg hover:bg-blue-50 flex items-center justify-center sm:justify-start">
                                         <i class="fas fa-plus mr-2"></i> Tambah Guru
@@ -350,15 +362,16 @@
                                     <h4 class="text-sm font-medium text-gray-700">Data Siswa dan Orang Tua (Nama Siswa, Kelas, Nama Orang Tua)</h4>
                                     <div id="siswa-ortu-container" class="space-y-4">
                                         <div class="siswa-ortu-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
-                                            <div class="space-y-1">
+                                            <div class="space-y-1 relative">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                                                <input type="text" name="nama_siswa[]" placeholder="Nama Siswa" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="nama_siswa[]" placeholder="Ketik nama siswa..." required autocomplete="off"
+                                                    class="ortu-siswa-nama-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <div class="ortu-siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                                                <input type="text" name="kelas[]" placeholder="Kelas" required
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="kelas[]" placeholder="Kelas akan terisi otomatis" required readonly
+                                                    class="ortu-siswa-kelas-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Nama Orang Tua</label>
@@ -445,197 +458,579 @@
             </div>
         </div>
 
+        <!-- Modal Search Guru -->
+        <div id="guru-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-50 transition-opacity"></div>
+                <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+                    <div class="flex items-center justify-between p-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Pilih Data Guru</h3>
+                        <button type="button" id="close-modal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <input type="text" id="search-input" placeholder="Cari nama atau NIP..." 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-4">
+                        <div id="guru-list" class="max-h-60 overflow-y-auto space-y-2">
+                            <!-- Data akan diload via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
             // File upload preview
-            document.getElementById('file-upload').addEventListener('change', function(e) {
-                const files = e.target.files;
-                if (files.length > 0) {
-                    const fileNames = Array.from(files).map(file => file.name).join(', ');
-                    const label = document.querySelector('label[for="file-upload"]');
-                    label.innerHTML = `<span class="text-green-600"><i class="fas fa-check mr-1"></i>${files.length} file dipilih</span>`;
-                }
-            });
+document.getElementById('file-upload').addEventListener('change', function(e) {
+    const files = e.target.files;
+    if (files.length > 0) {
+        const fileNames = Array.from(files).map(file => file.name).join(', ');
+        const label = document.querySelector('label[for="file-upload"]');
+        label.innerHTML = `<span class="text-green-600"><i class="fas fa-check mr-1"></i>${files.length} file dipilih</span>`;
+    }
+});
 
-            // Dynamic fields for Surat Perintah Tugas
-            const addGuruBtn = document.getElementById('add-guru');
-            const guruContainer = document.getElementById('guru-container');
-            if (addGuruBtn) {
-                addGuruBtn.addEventListener('click', function() {
-                    const newRow = document.createElement('div');
-                    newRow.classList.add('guru-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
-                    newRow.innerHTML = `
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Nama Guru</label>
-                            <input type="text" name="nama[]" placeholder="Nama Guru" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
-                            <input type="text" name="nip[]" placeholder="NIP" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Keterangan</label>
-                            <input type="text" name="keterangan[]" placeholder="Keterangan (peran)" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="sm:col-span-3 flex justify-end">
-                            <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
-                                <i class="fas fa-times mr-1"></i>Hapus
-                            </button>
-                        </div>
-                    `;
-                    guruContainer.appendChild(newRow);
-                    
-                    // Add remove functionality
-                    const removeBtn = newRow.querySelector('.remove-row');
-                    removeBtn.addEventListener('click', function() {
-                        newRow.remove();
-                    });
-                });
+// Data storage
+let guruData = [];
+let siswaData = [];
+
+// Load data saat halaman dimuat
+Promise.all([
+    fetch('/guru-data').then(r => r.json()),
+    fetch('/siswa-data').then(r => r.json())
+]).then(([guru, siswa]) => {
+    guruData = guru;
+    siswaData = siswa;
+    initializeAllAutocomplete();
+}).catch(() => {
+    // Fallback jika fetch gagal
+    guruData = [];
+    siswaData = [];
+});
+
+// Initialize semua autocomplete
+function initializeAllAutocomplete() {
+    setupExistingAutocomplete();
+    setupDynamicAutocomplete();
+}
+
+// Setup autocomplete untuk input yang sudah ada
+function setupExistingAutocomplete() {
+    // Autocomplete untuk Data Pemohon
+    const namaInput = document.getElementById('nama-input');
+    const nipInput = document.getElementById('nip-input');
+    const dropdown = document.getElementById('autocomplete-dropdown');
+
+    if (namaInput && dropdown) {
+        setupSingleAutocomplete(namaInput, dropdown, nipInput, guruData, 'guru');
+    }
+
+    // Setup untuk input yang sudah ada di form
+    setupAutocompleteForExisting();
+}
+
+// Setup autocomplete untuk input yang sudah ada di form
+function setupAutocompleteForExisting() {
+    // Surat Perintah Tugas - input yang sudah ada
+    document.querySelectorAll('.guru-nama-input').forEach(input => {
+        const dropdown = input.nextElementSibling;
+        const nipInput = input.closest('.guru-row').querySelector('.guru-nip-input');
+        if (dropdown) setupSingleAutocomplete(input, dropdown, nipInput, guruData, 'guru');
+    });
+
+    // Surat Dispensasi - input yang sudah ada
+    document.querySelectorAll('.siswa-nama-input').forEach(input => {
+        const dropdown = input.nextElementSibling;
+        const row = input.closest('.siswa-row');
+        const nisnInput = row ? row.querySelector('.siswa-nisn-input') : null;
+        const kelasInput = row ? row.querySelector('.siswa-kelas-input') : null;
+        if (dropdown) setupSingleAutocomplete(input, dropdown, {nisn: nisnInput, kelas: kelasInput}, siswaData, 'siswa');
+    });
+
+    // Surat Panggilan Ortu - Guru Ditemui
+    document.querySelectorAll('.guru-ditemui-input').forEach(input => {
+        const dropdown = input.nextElementSibling;
+        if (dropdown) setupSingleAutocomplete(input, dropdown, null, guruData, 'guru-only');
+    });
+
+    // Surat Panggilan Ortu - Siswa
+    document.querySelectorAll('.siswa-ortu-nama-input').forEach(input => {
+        const dropdown = input.nextElementSibling;
+        const kelasInput = input.closest('.siswa-ortu-row').querySelector('.siswa-ortu-kelas-input');
+        if (dropdown) setupSingleAutocomplete(input, dropdown, kelasInput, siswaData, 'siswa-ortu');
+    });
+}
+
+// Setup autocomplete untuk satu input
+function setupSingleAutocomplete(input, dropdown, secondaryInput, data, type) {
+    input.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (searchTerm.length === 0) {
+            dropdown.classList.add('hidden');
+            clearSecondaryInputs(secondaryInput);
+            return;
+        }
+        
+        const filtered = data.filter(item => 
+            item.nama.toLowerCase().includes(searchTerm)
+        ).slice(0, 5);
+        
+        showAutocompleteDropdown(dropdown, filtered, input, secondaryInput, type);
+    });
+
+    input.addEventListener('blur', function() {
+        setTimeout(() => dropdown.classList.add('hidden'), 150);
+    });
+
+    input.addEventListener('focus', function(e) {
+        if (e.target.value.length > 0) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const filtered = data.filter(item => 
+                item.nama.toLowerCase().includes(searchTerm)
+            ).slice(0, 5);
+            showAutocompleteDropdown(dropdown, filtered, input, secondaryInput, type);
+        }
+    });
+}
+
+// Clear secondary inputs
+function clearSecondaryInputs(secondaryInput) {
+    if (!secondaryInput) return;
+    
+    if (typeof secondaryInput === 'object' && secondaryInput.nisn) {
+        // Untuk siswa (nisn & kelas)
+        if (secondaryInput.nisn) secondaryInput.nisn.value = '';
+        if (secondaryInput.kelas) secondaryInput.kelas.value = '';
+    } else if (secondaryInput) {
+        // Untuk input tunggal
+        secondaryInput.value = '';
+    }
+}
+
+// Show autocomplete dropdown
+function showAutocompleteDropdown(dropdown, suggestions, input, secondaryInput, type) {
+    if (suggestions.length === 0) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+    
+    dropdown.innerHTML = '';
+    dropdown.classList.remove('hidden');
+    
+    suggestions.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0';
+        
+        if (type === 'guru') {
+            div.innerHTML = `
+                <div class="font-medium text-gray-900">${item.nama}</div>
+                <div class="text-sm text-gray-600">${item.nip}</div>
+            `;
+        } else if (type === 'siswa') {
+            div.innerHTML = `
+                <div class="font-medium text-gray-900">${item.nama}</div>
+                <div class="text-sm text-gray-600">${item.nisn} - ${item.kelas}</div>
+            `;
+        } else if (type === 'guru-only') {
+            div.innerHTML = `<div class="font-medium text-gray-900">${item.nama}</div>`;
+        } else if (type === 'siswa-ortu') {
+            div.innerHTML = `
+                <div class="font-medium text-gray-900">${item.nama}</div>
+                <div class="text-sm text-gray-600">${item.kelas}</div>
+            `;
+        }
+        
+        div.onclick = () => selectAutocompleteItem(item, input, dropdown, secondaryInput, type);
+        dropdown.appendChild(div);
+    });
+}
+
+// Select autocomplete item
+function selectAutocompleteItem(item, input, dropdown, secondaryInput, type) {
+    input.value = item.nama;
+    dropdown.classList.add('hidden');
+    
+    if (secondaryInput) {
+        if (type === 'guru' && secondaryInput) {
+            secondaryInput.value = item.nip;
+        } else if (type === 'siswa' && typeof secondaryInput === 'object') {
+            if (secondaryInput.nisn) secondaryInput.nisn.value = item.nisn;
+            if (secondaryInput.kelas) secondaryInput.kelas.value = item.kelas;
+        } else if (type === 'siswa-ortu' && secondaryInput) {
+            secondaryInput.value = item.kelas;
+        }
+    }
+}
+
+// Setup dynamic autocomplete untuk row baru
+function setupDynamicAutocomplete() {
+    // Tidak perlu setup awal karena akan dipanggil saat row baru ditambah
+}
+
+// Function untuk setup autocomplete pada row baru
+function setupAutocompleteForNewRow(newRow, type) {
+    if (type === 'guru') {
+        const namaInput = newRow.querySelector('input[name="nama[]"]');
+        const nipInput = newRow.querySelector('input[name="nip[]"]');
+        if (namaInput && nipInput) {
+            // Tambah class dan dropdown
+            namaInput.classList.add('guru-nama-input');
+            namaInput.setAttribute('autocomplete', 'off');
+            nipInput.classList.add('guru-nip-input');
+            nipInput.setAttribute('readonly', true);
+            nipInput.classList.add('bg-gray-50');
+            
+            // Buat dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'guru-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto';
+            namaInput.parentElement.style.position = 'relative';
+            namaInput.parentElement.appendChild(dropdown);
+            
+            setupSingleAutocomplete(namaInput, dropdown, nipInput, guruData, 'guru');
+        }
+    } else if (type === 'siswa') {
+        const namaInput = newRow.querySelector('input[name="nama[]"]');
+        const nisnInput = newRow.querySelector('input[name="nisn[]"]');
+        const kelasInput = newRow.querySelector('input[name="kelas[]"]');
+        if (namaInput && nisnInput && kelasInput) {
+            // Tambah class dan dropdown
+            namaInput.classList.add('siswa-nama-input');
+            namaInput.setAttribute('autocomplete', 'off');
+            nisnInput.classList.add('siswa-nisn-input');
+            nisnInput.setAttribute('readonly', true);
+            nisnInput.classList.add('bg-gray-50');
+            kelasInput.classList.add('siswa-kelas-input');
+            kelasInput.setAttribute('readonly', true);
+            kelasInput.classList.add('bg-gray-50');
+            
+            // Buat dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto';
+            namaInput.parentElement.style.position = 'relative';
+            namaInput.parentElement.appendChild(dropdown);
+            
+            setupSingleAutocomplete(namaInput, dropdown, {nisn: nisnInput, kelas: kelasInput}, siswaData, 'siswa');
+        }
+    } else if (type === 'guru-ditemui') {
+        const namaInput = newRow.querySelector('input[name="guru_ditemui[]"]');
+        if (namaInput) {
+            namaInput.classList.add('guru-ditemui-input');
+            namaInput.setAttribute('autocomplete', 'off');
+            
+            // Buat dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'guru-ditemui-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto';
+            namaInput.parentElement.style.position = 'relative';
+            namaInput.parentElement.appendChild(dropdown);
+            
+            setupSingleAutocomplete(namaInput, dropdown, null, guruData, 'guru-only');
+        }
+    } else if (type === 'siswa-ortu') {
+        const namaInput = newRow.querySelector('input[name="nama_siswa[]"]');
+        const kelasInput = newRow.querySelector('input[name="kelas[]"]');
+        if (namaInput && kelasInput) {
+            namaInput.classList.add('siswa-ortu-nama-input');
+            namaInput.setAttribute('autocomplete', 'off');
+            kelasInput.classList.add('siswa-ortu-kelas-input');
+            kelasInput.setAttribute('readonly', true);
+            kelasInput.classList.add('bg-gray-50');
+            
+            // Buat dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'siswa-ortu-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto';
+            namaInput.parentElement.style.position = 'relative';
+            namaInput.parentElement.appendChild(dropdown);
+            
+            setupSingleAutocomplete(namaInput, dropdown, kelasInput, siswaData, 'siswa-ortu');
+        }
+    }
+}
+
+// Dynamic fields for Surat Perintah Tugas
+const addGuruBtn = document.getElementById('add-guru');
+const guruContainer = document.getElementById('guru-container');
+if (addGuruBtn) {
+    addGuruBtn.addEventListener('click', function() {
+        const newRow = document.createElement('div');
+        newRow.classList.add('guru-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
+        newRow.innerHTML = `
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Nama Guru</label>
+                <div class="relative">
+                    <input type="text" name="nama[]" placeholder="Ketik nama guru..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
+                <input type="text" name="nip[]" placeholder="NIP otomatis" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Keterangan</label>
+                <input type="text" name="keterangan[]" placeholder="Keterangan (peran)" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+            </div>
+            <div class="sm:col-span-3 flex justify-end">
+                <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
+                    <i class="fas fa-times mr-1"></i>Hapus
+                </button>
+            </div>
+        `;
+        guruContainer.appendChild(newRow);
+        
+        // Setup autocomplete untuk row baru
+        setupAutocompleteForNewRow(newRow, 'guru');
+        
+        // Add remove functionality
+        const removeBtn = newRow.querySelector('.remove-row');
+        removeBtn.addEventListener('click', function() {
+            newRow.remove();
+        });
+    });
+}
+
+// Dynamic fields for Surat Dispensasi
+const addSiswaDispensasiBtn = document.getElementById('add-siswa-dispensasi');
+const siswaDispensasiContainer = document.getElementById('siswa-dispensasi-container');
+if (addSiswaDispensasiBtn) {
+    addSiswaDispensasiBtn.addEventListener('click', function() {
+        const newRow = document.createElement('div');
+        newRow.classList.add('siswa-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
+        newRow.innerHTML = `
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
+                <div class="relative">
+                    <input type="text" name="nama[]" placeholder="Ketik nama siswa..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">NISN</label>
+                <input type="text" name="nisn[]" placeholder="NISN otomatis" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
+                <input type="text" name="kelas[]" placeholder="Kelas otomatis" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
+            </div>
+            <div class="sm:col-span-3 flex justify-end">
+                <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
+                    <i class="fas fa-times mr-1"></i>Hapus
+                </button>
+            </div>
+        `;
+        siswaDispensasiContainer.appendChild(newRow);
+        
+        // Setup autocomplete untuk row baru
+        setupAutocompleteForNewRow(newRow, 'siswa');
+        
+        // Add remove functionality
+        const removeBtn = newRow.querySelector('.remove-row');
+        removeBtn.addEventListener('click', function() {
+            newRow.remove();
+        });
+    });
+}
+
+// Dynamic fields for Surat Panggilan Orang Tua - Guru Ditemui
+const addGuruDitemuiBtn = document.getElementById('add-guru-ditemui');
+const guruDitemuiContainer = document.getElementById('guru-ditemui-container');
+if (addGuruDitemuiBtn) {
+    addGuruDitemuiBtn.addEventListener('click', function() {
+        const newRow = document.createElement('div');
+        newRow.classList.add('guru-ditemui-row', 'p-4', 'bg-gray-50', 'rounded-lg');
+        newRow.innerHTML = `
+            <div class="flex space-x-3">
+                <div class="relative flex-1">
+                    <input type="text" name="guru_ditemui[]" placeholder="Ketik nama guru..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                </div>
+                <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm flex-shrink-0">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        guruDitemuiContainer.appendChild(newRow);
+        
+        // Setup autocomplete untuk row baru
+        setupAutocompleteForNewRow(newRow, 'guru-ditemui');
+        
+        // Add remove functionality
+        const removeBtn = newRow.querySelector('.remove-row');
+        removeBtn.addEventListener('click', function() {
+            newRow.remove();
+        });
+    });
+}
+
+// Dynamic fields for Surat Panggilan Orang Tua - Siswa dan Ortu
+const addSiswaOrtuBtn = document.getElementById('add-siswa-ortu');
+const siswaOrtuContainer = document.getElementById('siswa-ortu-container');
+if (addSiswaOrtuBtn) {
+    addSiswaOrtuBtn.addEventListener('click', function() {
+        const newRow = document.createElement('div');
+        newRow.classList.add('siswa-ortu-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
+        newRow.innerHTML = `
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
+                <div class="relative">
+                    <input type="text" name="nama_siswa[]" placeholder="Ketik nama siswa..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
+                <input type="text" name="kelas[]" placeholder="Kelas otomatis" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs text-gray-600 sm:hidden">Nama Orang Tua</label>
+                <input type="text" name="nama_ortu[]" placeholder="Nama Orang Tua" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+            </div>
+            <div class="sm:col-span-3 flex justify-end">
+                <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
+                    <i class="fas fa-times mr-1"></i>Hapus
+                </button>
+            </div>
+        `;
+        siswaOrtuContainer.appendChild(newRow);
+        
+        // Setup autocomplete untuk row baru
+        setupAutocompleteForNewRow(newRow, 'siswa-ortu');
+        
+        // Add remove functionality
+        const removeBtn = newRow.querySelector('.remove-row');
+        removeBtn.addEventListener('click', function() {
+            newRow.remove();
+        });
+    });
+}
+
+// Modal dan Search Guru functionality (untuk Data Pemohon)
+if (document.getElementById('guru-modal')) {
+    // Function untuk menampilkan modal
+    function showModal() {
+        document.getElementById('guru-modal').classList.remove('hidden');
+        displayGuruList(guruData);
+    }
+
+    // Function untuk menyembunyikan modal
+    function hideModal() {
+        document.getElementById('guru-modal').classList.add('hidden');
+        document.getElementById('search-input').value = '';
+    }
+
+    // Function untuk menampilkan daftar guru
+    function displayGuruList(data) {
+        const container = document.getElementById('guru-list');
+        container.innerHTML = '';
+        
+        data.forEach(guru => {
+            const item = document.createElement('div');
+            item.className = 'p-3 border rounded-lg hover:bg-gray-50 cursor-pointer';
+            item.innerHTML = `
+                <div class="font-medium text-gray-900">${guru.nama}</div>
+                <div class="text-sm text-gray-600">${guru.nip}</div>
+            `;
+            item.onclick = () => selectGuru(guru);
+            container.appendChild(item);
+        });
+    }
+
+    // Function untuk memilih guru
+    function selectGuru(guru) {
+        document.getElementById('nama-input').value = guru.nama;
+        document.getElementById('nip-input').value = guru.nip;
+        hideModal();
+    }
+
+    // Event listeners
+    const searchBtn1 = document.getElementById('search-guru-btn');
+    const searchBtn2 = document.getElementById('search-guru-btn-2');
+    const closeModalBtn = document.getElementById('close-modal');
+    const searchInput = document.getElementById('search-input');
+    const modal = document.getElementById('guru-modal');
+
+    if (searchBtn1) searchBtn1.addEventListener('click', showModal);
+    if (searchBtn2) searchBtn2.addEventListener('click', showModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', hideModal);
+
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = guruData.filter(guru => 
+                guru.nama.toLowerCase().includes(searchTerm) || 
+                guru.nip.includes(searchTerm)
+            );
+            displayGuruList(filtered);
+        });
+    }
+
+    // Close modal when clicking outside
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideModal();
             }
+        });
+    }
+}
 
-            // Dynamic fields for Surat Dispensasi
-            const addSiswaDispensasiBtn = document.getElementById('add-siswa-dispensasi');
-            const siswaDispensasiContainer = document.getElementById('siswa-dispensasi-container');
-            if (addSiswaDispensasiBtn) {
-                addSiswaDispensasiBtn.addEventListener('click', function() {
-                    const newRow = document.createElement('div');
-                    newRow.classList.add('siswa-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
-                    newRow.innerHTML = `
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                            <input type="text" name="nama[]" placeholder="Nama Siswa" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">NISN</label>
-                            <input type="text" name="nisn[]" placeholder="NISN" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                            <input type="text" name="kelas[]" placeholder="Kelas" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="sm:col-span-3 flex justify-end">
-                            <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
-                                <i class="fas fa-times mr-1"></i>Hapus
-                            </button>
-                        </div>
-                    `;
-                    siswaDispensasiContainer.appendChild(newRow);
-                    
-                    // Add remove functionality
-                    const removeBtn = newRow.querySelector('.remove-row');
-                    removeBtn.addEventListener('click', function() {
-                        newRow.remove();
-                    });
-                });
+// Enhanced mobile touch experience
+document.addEventListener('DOMContentLoaded', function() {
+    // Add touch feedback for mobile devices
+    const interactiveElements = document.querySelectorAll('button, input, select, textarea');
+    
+    interactiveElements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'scale(0.98)';
             }
-
-            // Dynamic fields for Surat Panggilan Orang Tua - Guru Ditemui
-            const addGuruDitemuiBtn = document.getElementById('add-guru-ditemui');
-            const guruDitemuiContainer = document.getElementById('guru-ditemui-container');
-            if (addGuruDitemuiBtn) {
-                addGuruDitemuiBtn.addEventListener('click', function() {
-                    const newRow = document.createElement('div');
-                    newRow.classList.add('guru-ditemui-row', 'p-4', 'bg-gray-50', 'rounded-lg');
-                    newRow.innerHTML = `
-                        <div class="flex space-x-3">
-                            <input type="text" name="guru_ditemui[]" placeholder="Nama Guru yang Ditemui" required class="flex-1 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                            <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm flex-shrink-0">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
-                    guruDitemuiContainer.appendChild(newRow);
-                    
-                    // Add remove functionality
-                    const removeBtn = newRow.querySelector('.remove-row');
-                    removeBtn.addEventListener('click', function() {
-                        newRow.remove();
-                    });
-                });
+        });
+        
+        element.addEventListener('touchend', function() {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'scale(1)';
             }
-
-            // Dynamic fields for Surat Panggilan Orang Tua - Siswa dan Ortu
-            const addSiswaOrtuBtn = document.getElementById('add-siswa-ortu');
-            const siswaOrtuContainer = document.getElementById('siswa-ortu-container');
-            if (addSiswaOrtuBtn) {
-                addSiswaOrtuBtn.addEventListener('click', function() {
-                    const newRow = document.createElement('div');
-                    newRow.classList.add('siswa-ortu-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
-                    newRow.innerHTML = `
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                            <input type="text" name="nama_siswa[]" placeholder="Nama Siswa" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                            <input type="text" name="kelas[]" placeholder="Kelas" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block text-xs text-gray-600 sm:hidden">Nama Orang Tua</label>
-                            <input type="text" name="nama_ortu[]" placeholder="Nama Orang Tua" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                        </div>
-                        <div class="sm:col-span-3 flex justify-end">
-                            <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
-                                <i class="fas fa-times mr-1"></i>Hapus
-                            </button>
-                        </div>
-                    `;
-                    siswaOrtuContainer.appendChild(newRow);
-                    
-                    // Add remove functionality
-                    const removeBtn = newRow.querySelector('.remove-row');
-                    removeBtn.addEventListener('click', function() {
-                        newRow.remove();
-                    });
+        });
+    });
+    
+    // Smooth scroll to validation errors
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('invalid', function(e) {
+            e.preventDefault();
+            const firstInvalid = form.querySelector(':invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
                 });
+                firstInvalid.focus();
             }
+        }, true);
+    }
+});
 
-            // Enhanced mobile touch experience
-            document.addEventListener('DOMContentLoaded', function() {
-                // Add touch feedback for mobile devices
-                const interactiveElements = document.querySelectorAll('button, input, select, textarea');
-                
-                interactiveElements.forEach(element => {
-                    element.addEventListener('touchstart', function() {
-                        if (window.innerWidth <= 768) {
-                            this.style.transform = 'scale(0.98)';
-                        }
-                    });
-                    
-                    element.addEventListener('touchend', function() {
-                        if (window.innerWidth <= 768) {
-                            this.style.transform = 'scale(1)';
-                        }
-                    });
-                });
-                
-                // Smooth scroll to validation errors
-                const form = document.querySelector('form');
-                if (form) {
-                    form.addEventListener('invalid', function(e) {
-                        e.preventDefault();
-                        const firstInvalid = form.querySelector(':invalid');
-                        if (firstInvalid) {
-                            firstInvalid.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'center'
-                            });
-                            firstInvalid.focus();
-                        }
-                    }, true);
-                }
-            });
-
-            // Prevent zoom on input focus for iOS
-            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                const inputs = document.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    input.addEventListener('focus', function() {
-                        if (this.style.fontSize !== '16px') {
-                            this.style.fontSize = '16px';
-                        }
-                    });
-                });
+// Prevent zoom on input focus for iOS
+if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            if (this.style.fontSize !== '16px') {
+                this.style.fontSize = '16px';
             }
+        });
+    });
+}
+
+// Hide dropdown saat klik di luar untuk semua dropdown
+document.addEventListener('click', function(e) {
+    // Hide semua dropdown autocomplete
+    const dropdowns = document.querySelectorAll('.guru-dropdown, .siswa-dropdown, .guru-ditemui-dropdown, .siswa-ortu-dropdown, #autocomplete-dropdown');
+    dropdowns.forEach(dropdown => {
+        const input = dropdown.previousElementSibling;
+        if (input && !input.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+});
         </script>
     </body>
     </html>
