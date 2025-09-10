@@ -22,11 +22,35 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
         }
-        button {
+        /* Button global - KECUALI password toggle */
+        button:not(.password-toggle-btn) {
             transition: background 0.3s ease, transform 0.2s ease;
         }
-        button:hover {
+        button:not(.password-toggle-btn):hover {
             transform: scale(1.05);
+        }
+        
+        /* Password toggle button - NO HOVER EFFECTS tapi ada click effect */
+        .password-toggle-btn {
+            transition: none !important;
+            transform: translateY(-50%) !important;
+        }
+        .password-toggle-btn:hover {
+            transform: translateY(-50%) !important;
+            background: none !important;
+            color: inherit !important;
+            scale: none !important;
+        }
+        .password-toggle-btn:hover i {
+            transform: none !important;
+        }
+        /* Click effect untuk password toggle */
+        .password-toggle-btn:active {
+            transform: translateY(-50%) scale(0.95) !important;
+            transition: transform 0.1s ease !important;
+        }
+        .password-toggle-btn i {
+            transition: opacity 0.2s ease;
         }
         input:focus, select:focus {
             outline: none;
@@ -129,7 +153,7 @@
                                    placeholder="Masukkan password"
                                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                             <button type="button" onclick="togglePassword('password', 'togglePassword1')" 
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    class="password-toggle-btn absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                                 <i id="togglePassword1" class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -145,7 +169,7 @@
                                    placeholder="Konfirmasi password"
                                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                             <button type="button" onclick="togglePassword('confirm_password', 'togglePassword2')" 
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    class="password-toggle-btn absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                                 <i id="togglePassword2" class="fas fa-eye"></i>
                             </button>
                         </div>
