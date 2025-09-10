@@ -416,7 +416,7 @@
                     </div>
 
                     <!-- Persetujuan -->
-                    <div class="bg-gray-50 p-4 sm:p-6 rounded-lg">
+                    <!-- <div class="bg-gray-50 p-4 sm:p-6 rounded-lg">
                         <div class="flex items-start space-x-3">
                             <input type="checkbox" id="agreement" name="agreement" required 
                                 class="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0">
@@ -424,7 +424,7 @@
                                 <span class="font-medium">Pernyataan:</span> Saya menyatakan bahwa data yang saya isi adalah benar dan dapat dipertanggungjawabkan. Saya bersedia menerima sanksi apabila dikemudian hari terbukti data yang saya sampaikan tidak benar.
                             </label>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Submit Button -->
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0 pt-6">
