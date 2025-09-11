@@ -60,11 +60,7 @@
                 <p class="text-gray-600">SMK Negeri 4 Malang</p>
             </div>
 
-            @if(session('error'))
-            <div class="bg-red-200 p-2 rounded mb-2">
-                {{ session('error') }}
-            </div>
-            @endif
+            
 
             <!-- Login Form -->
             <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 card">

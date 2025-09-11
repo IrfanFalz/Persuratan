@@ -125,9 +125,8 @@
                         </label>
                         <select name="role" id="role" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white">
-                            <option value="">Pilih Role</option>
+                            <option value="" disabled selected hidden>Pilih Role</option>
                             <option value="GURU">Guru</option>
-                            <option value="KTU">Kepala Tata Usaha (KTU)</option>
                             <option value="TU">Tata Usaha (TU)</option>
                             <option value="KEPSEK">Kepala Sekolah</option>
                         </select>

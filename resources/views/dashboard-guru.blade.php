@@ -437,7 +437,7 @@
                     <div class="flex items-start">
                         <i class="fas fa-check-circle text-green-500 mr-3 mt-1 flex-shrink-0"></i>
                         <div class="min-w-0 flex-1">
-                            <p class="font-medium text-gray-800 text-sm sm:text-base">Surat Tugas Anda telah disetujui KTU</p>
+                            <p class="font-medium text-gray-800 text-sm sm:text-base">Surat Tugas Anda telah disetujui Kepala Sekolah</p>
                             <p class="text-xs sm:text-sm text-gray-600">25 Agustus 2025, 14:30</p>
                         </div>
                     </div>
