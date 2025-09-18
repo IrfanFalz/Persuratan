@@ -1,3 +1,11 @@
+@php
+    $roles = [
+        'KEPSEK' => 'Kepala Sekolah',
+        'TU' => 'Tata Usaha',
+        'GURU' => 'Guru',
+    ];
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -150,7 +158,7 @@
                     <!-- User Info - Hidden on mobile -->
                     <div class="text-right hidden md:block">
                         <p class="text-sm font-medium text-gray-800">{{ session('name') }}</p>
-                        <p class="text-xs text-gray-600">{{ session('role') }}</p>
+                        <p class="text-xs text-gray-600">{{ $roles[session('role')] }}</p>
                     </div>
                     
                     <!-- Logout Button -->
@@ -165,12 +173,23 @@
     <div class="max-w-7xl mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
         <!-- Success Message -->
        @if(isset($message))
-            <div class="mb-4 sm:mb-6 bg-green-50 border border-green-200 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle mr-2 sm:mr-3 text-lg sm:text-xl flex-shrink-0"></i>
-                    <p class="text-sm sm:text-base">{{ $message }}</p>
+            @if(session('status') === 'error')
+                <!-- Message untuk penolakan -->
+                <div class="mb-4 sm:mb-6 bg-red-50 border border-red-200 text-red-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-times-circle mr-2 sm:mr-3 text-lg sm:text-xl flex-shrink-0"></i>
+                        <p class="text-sm sm:text-base">{{ $message }}</p>
+                    </div>
                 </div>
-            </div>
+            @else
+                <!-- Message untuk persetujuan (default) -->
+                <div class="mb-4 sm:mb-6 bg-green-50 border border-green-200 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2 sm:mr-3 text-lg sm:text-xl flex-shrink-0"></i>
+                        <p class="text-sm sm:text-base">{{ $message }}</p>
+                    </div>
+                </div>
+            @endif
         @endif
 
         <!-- Welcome Card -->
@@ -223,12 +242,12 @@
             <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div class="min-w-0 flex-1">
-                        <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Disetujui KTU</p>
-                        <p class="text-2xl sm:text-3xl font-bold text-indigo-600">{{ $monthly_stats['approved_by_ktu'] }}</p>
+                        <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Ditolak</p>
+                        <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $monthly_stats['rejected'] }}</p>
                         <p class="text-xs text-gray-500">Bulan ini</p>
                     </div>
-                    <div class="icon-bg bg-indigo-100 ml-2">
-                        <i class="fas fa-user-check text-indigo-600 text-lg sm:text-xl"></i>
+                    <div class="icon-bg bg-red-100 ml-2">
+                        <i class="fas fa-close text-red-600 text-lg sm:text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -250,13 +269,20 @@
                                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center space-x-3 mb-3">
-                                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                                                {{ strtoupper(substr($request['teacher'], 0, 2)) }}
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
+                                                <img src="{{ asset('images/pp.png') }}" 
+                                                    alt="Avatar {{ $request['teacher'] }}" 
+                                                    class="w-full h-full object-cover"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <!-- Fallback jika gambar tidak ditemukan -->
+                                                <div class="w-full h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-content text-white font-bold" style="display: none;">
+                                                    {{ strtoupper(substr($request['teacher'], 0, 2)) }}
+                                                </div>
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <h4 class="font-semibold text-gray-800 truncate">{{ $request['teacher'] }}</h4>
                                                 <p class="text-sm text-gray-600 truncate">NIP: {{ $request['nip'] }}</p>
-                                                <p class="text-sm text-gray-600 truncate">Mata Pelajaran: {{ $request['subject'] }}</p>
+                                                
                                             </div>
                                         </div>
                                         <div class="space-y-1">
@@ -314,6 +340,7 @@
             </div>
 
             <!-- Quick Stats -->
+            <!-- Replace the Quick Stats section with this chart section -->
             <div class="xl:col-span-1">
                 <div class="stat-card">
                     <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center">
@@ -321,17 +348,40 @@
                         <span class="truncate">Statistik Bulanan</span>
                     </h3>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-4">
-                        <div class="p-4 bg-green-50 rounded-lg text-center">
-                            <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
-                            <h4 class="font-semibold text-green-800 text-sm sm:text-base">Disetujui</h4>
-                            <p class="text-xl sm:text-2xl font-bold text-green-600"> {{ $monthly_stats['approved_by_kepsek'] + $monthly_stats['approved_by_ktu'] }}</p>
+                    <!-- Chart Container -->
+                    <div class="relative">
+                        <canvas id="monthlyStatsChart" width="300" height="300" class="max-w-full"></canvas>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Disetujui</span>
+                            </div>
+                            <span class="font-semibold text-green-600">{{ $monthly_stats['approved_by_kepsek'] }}</span>
                         </div>
-                        
-                        <div class="p-4 bg-yellow-50 rounded-lg text-center">
-                            <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
-                            <h4 class="font-semibold text-yellow-800 text-sm sm:text-base">Pending</h4>
-                            <p class="text-xl sm:text-2xl font-bold text-yellow-600">{{ $monthly_stats['pending'] }}</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Pending</span>
+                            </div>
+                            <span class="font-semibold text-yellow-600">{{ $monthly_stats['pending'] }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Ditolak</span>
+                            </div>
+                            <span class="font-semibold text-red-600">{{ $monthly_stats['rejected'] }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                <span class="text-gray-700">Total</span>
+                            </div>
+                            <span class="font-semibold text-blue-600">{{ $monthly_stats['total_letters'] }}</span>
                         </div>
                     </div>
                 </div>
@@ -369,7 +419,7 @@
                             <div>
                                 <p class="font-medium text-gray-600">No. Telepon</p>
                                 <p id="detail_no_telp" class="text-gray-800"></p>
-                            </div>
+                            </div> 
                         </div>
                     </div>
                     
@@ -546,8 +596,12 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
     <script>
         let currentRequestData = null;
+
+        
 
         function openDetailModal(requestData) {
             currentRequestData = requestData;
@@ -661,6 +715,65 @@
                 closeModal('approvalModal');
                 closeModal('rejectionModal');
             }
+        });
+
+
+        // Chart initialization script (add this to your existing script section)
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('monthlyStatsChart').getContext('2d');
+            
+            // Get data from PHP variables
+            const approved = {{ $monthly_stats['approved_by_kepsek'] }};
+            const pending = {{ $monthly_stats['pending'] }};
+            const rejected = {{ $monthly_stats['rejected'] }};
+            
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Disetujui', 'Pending', 'Ditolak'],
+                    datasets: [{
+                        data: [approved, pending, rejected],
+                        backgroundColor: [
+                            '#10B981', // Green for approved
+                            '#F59E0B', // Yellow for pending  
+                            '#EF4444'  // Red for rejected
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Hide default legend since we have custom one
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%', // Creates donut effect
+                    animation: {
+                        animateRotate: true,
+                        animateScale: false
+                    }
+                }
+            });
+            
+            // Resize chart on window resize
+            window.addEventListener('resize', function() {
+                chart.resize();
+            });
         });
     </script>
 </body>

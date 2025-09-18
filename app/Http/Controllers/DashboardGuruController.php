@@ -73,7 +73,7 @@ class DashboardGuruController extends Controller
         $letter_types = [
             'surat-perintah-tugas' => 'Surat Perintah Tugas',
             'surat-dispensasi' => 'Surat Dispensasi',
-            'surat-panggilan-ortu' => 'Surat Panggilan Orang Tua'
+            //'surat-panggilan-ortu' => 'Surat Panggilan Orang Tua'
         ];
 
         return view('dashboard-guru', compact('letter_requests', 'letter_types'));

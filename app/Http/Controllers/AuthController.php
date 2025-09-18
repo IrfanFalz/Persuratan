@@ -14,10 +14,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $users = [
-            'ktu' => ['password' => 'ktu123', 'role' => 'KTU', 'name' => 'Budi Santoso'],
+            //'ktu' => ['password' => 'ktu123', 'role' => 'KTU', 'name' => 'Budi Santoso'],
             'tu' => ['password' => 'tu123', 'role' => 'TU', 'name' => 'Siti Aminah'],
             'kepsek' => ['password' => 'kepsek123', 'role' => 'KEPSEK', 'name' => 'Dr. Ahmad Wijaya'],
             'guru1' => ['password' => 'guru123', 'role' => 'GURU', 'name' => 'Maya Sari'],
+            'admin' => ['password' => 'admin123', 'role' => 'ADMIN', 'name' => 'Administrator'],
         ];
 
         if ($request->isMethod('post')) {
@@ -33,9 +34,10 @@ class AuthController extends Controller
 
                 switch ($users[$username]['role']) {
                     case 'GURU': return redirect()->route('dashboard.guru');
-                    case 'KTU': return redirect()->route('dashboard.ktu');
+                   // case 'KTU': return redirect()->route('dashboard.ktu');
                     case 'TU': return redirect()->route('dashboard.tu');
                     case 'KEPSEK': return redirect()->route('dashboard.kepsek');
+                    case 'ADMIN': return redirect()->route('dashboard.admin');
                 }
             } else {
                 return back()->with('error', 'Username atau password salah!');

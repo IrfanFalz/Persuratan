@@ -13,7 +13,7 @@ class DashboardKepsekController extends Controller
                 'id' => 1,
                 'teacher' => 'Maya Sari',
                 'nip' => '197801012005012001',
-                'subject' => 'Matematika',
+                
                 'type' => 'Surat Cuti',
                 'reason' => 'Cuti melahirkan',
                 'duration' => '3 bulan',
@@ -45,8 +45,8 @@ class DashboardKepsekController extends Controller
         $monthly_stats = [
             'total_letters' => 45,
             'approved_by_kepsek' => 12,
-            'approved_by_ktu' => 30,
-            'rejected' => 0,
+            //'approved_by_ktu' => 30,
+            'rejected' => 4,
             'pending' => 1
         ];
 
@@ -63,7 +63,7 @@ class DashboardKepsekController extends Controller
                ->with('message', session('message'));
     }
 
-    public function approval(Request $request)
+   public function approval(Request $request)
     {
         $action = $request->input('action');
         $id = $request->input('request_id');
@@ -77,10 +77,15 @@ class DashboardKepsekController extends Controller
 
         if ($action === 'approve') {
             $message = "Surat dari {$teacher} berhasil disetujui dan diteruskan ke TU.";
+            $status = 'success'; // Tambahkan status
         } else {
             $message = "Surat dari {$teacher} ditolak. Notifikasi dikirim ke guru terkait.";
+            $status = 'error'; // Tambahkan status
         }
 
-        return redirect()->route('dashboard.kepsek')->with('message', $message);
+        return redirect()->route('dashboard.kepsek')->with([
+            'message' => $message,
+            'status' => $status
+        ]);
     }
 }

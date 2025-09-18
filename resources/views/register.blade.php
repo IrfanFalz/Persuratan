@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Sistem Persuratan - SMA Negeri 1</title>
+    <title>Register - Sistem Persuratan - SMK Negeri 4 Malang</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -115,6 +115,16 @@
                         </label>
                         <input type="text" name="nip" id="nip" required
                                placeholder="Masukkan NIP"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                    </div>
+
+                    <!-- Telepon -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-phone mr-2 text-blue-500"></i>Telepon
+                        </label>
+                        <input type="text" name="telepon" id="telepon" required
+                               placeholder="Masukkan nomor telepon"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                     </div>
 

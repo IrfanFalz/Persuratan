@@ -1,4 +1,10 @@
-
+@php
+    $roles = [
+        'KEPSEK' => 'Kepala Sekolah',
+        'TU' => 'Tata Usaha',
+        'GURU' => 'Guru',
+    ];
+@endphp
 
 <!DOCTYPE html>
 <html lang="id">
@@ -226,7 +232,7 @@
                 <div class="flex items-center space-x-2 sm:space-x-4">
                     <div class="text-right hidden sm:block">
                         <p class="text-sm font-medium text-gray-800">{{ session('name') }}</p>
-                        <p class="text-xs text-gray-600">{{ session('role') }}</p>
+                        <p class="text-xs text-gray-600">{{ $roles[session('role')] }}</p>
                     </div>
                      <a href="{{ route('logout') }}" class="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg transition duration-200 text-xs sm:text-sm lg:text-base flex items-center">
                         <i class="fas fa-sign-out-alt mr-1"></i><span class="hidden sm:inline">Keluar</span>
@@ -250,20 +256,34 @@
                     <i class="fas fa-plus-circle text-blue-600 mr-2 sm:mr-3"></i>Buat Surat Baru
                 </h3>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="space-y-4">
                     @foreach($letter_types as $key => $type)
-                        <a href="{{ route('form.surat') }}?type={{ $key }}" class="letter-card group">
+                        <a href="{{ route('form.surat') }}?type={{ $key }}" 
+                        class="group block w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 
+                                border-2 border-transparent hover:border-blue-200 rounded-xl p-4 sm:p-6 
+                                transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
                             <div class="flex items-center justify-between">
-                                <div class="min-w-0 flex-1">
-                                    <h4 class="font-semibold text-gray-800 group-hover:text-blue-600 transition duration-200 text-sm sm:text-base">
-                                        {{ $type }}
-                                    </h4>
-                                    <p class="text-xs sm:text-sm text-gray-600 mt-1">Buat permintaan {{ strtolower($type) }}</p>
+                                <div class="flex items-center space-x-4">
+                                    <!-- Icon yang lebih besar -->
+                                    <div class="bg-blue-500 text-white p-3 rounded-lg group-hover:bg-blue-600 transition-colors">
+                                        <i class="fas {{ $key == 'surat-perintah-tugas' ? 'fa-briefcase' : 'fa-hand-paper' }} text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 group-hover:text-blue-600 transition duration-200 text-base sm:text-lg">
+                                            {{ $type }}
+                                        </h4>
+                                        <p class="text-sm text-gray-600 mt-1">Buat permintaan {{ strtolower($type) }} dengan mudah</p>
+                                        
+                                    </div>
                                 </div>
-                                <i class="fas fa-arrow-right text-blue-500 opacity-0 group-hover:opacity-100 transition duration-200 ml-2"></i>
+                                <div class="text-blue-500 group-hover:text-blue-600 transition-all duration-200">
+                                    <i class="fas fa-chevron-right text-xl group-hover:translate-x-1 transition-transform"></i>
+                                </div>
                             </div>
                         </a>
                     @endforeach
+                    
+                    
                 </div>
             </div>
 
@@ -483,7 +503,7 @@
                             <span class="text-gray-600">NIP:</span>
                             <p class="font-medium text-gray-800" id="modalPemohonNip">-</p>
                         </div>
-                        <div>
+                         <div>
                             <span class="text-gray-600">No. Telepon:</span>
                             <p class="font-medium text-gray-800" id="modalPemohonTelp">-</p>
                         </div>
