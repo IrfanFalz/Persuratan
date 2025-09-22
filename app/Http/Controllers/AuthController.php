@@ -15,10 +15,10 @@ class AuthController extends Controller
     {
         $users = [
             //'ktu' => ['password' => 'ktu123', 'role' => 'KTU', 'name' => 'Budi Santoso'],
-            'tu' => ['password' => 'tu123', 'role' => 'TU', 'name' => 'Siti Aminah'],
-            'kepsek' => ['password' => 'kepsek123', 'role' => 'KEPSEK', 'name' => 'Dr. Ahmad Wijaya'],
-            'guru1' => ['password' => 'guru123', 'role' => 'GURU', 'name' => 'Maya Sari'],
-            'admin' => ['password' => 'admin123', 'role' => 'ADMIN', 'name' => 'Administrator'],
+            '0111' => ['password' => 'tu123', 'role' => 'TU', 'name' => 'Siti Aminah'],
+            '0222' => ['password' => 'kepsek123', 'role' => 'KEPSEK', 'name' => 'Dr. Ahmad Wijaya'],
+            '0333' => ['password' => 'guru123', 'role' => 'GURU', 'name' => 'Maya Sari'],
+            '0444' => ['password' => 'admin123', 'role' => 'ADMIN', 'name' => 'Administrator'],
         ];
 
         if ($request->isMethod('post')) {

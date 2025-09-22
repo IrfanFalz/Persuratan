@@ -74,7 +74,7 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-user mr-2 text-blue-500"></i>Username
+                            <i class="fas fa-user mr-2 text-blue-500"></i>NIP
                         </label>
                         <input type="text" name="username" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
@@ -95,21 +95,21 @@
                 </form>
                 
                 <!-- Divider -->
-                <div class="my-6 flex items-center">
+                <!-- <div class="my-6 flex items-center">
                     <div class="flex-grow border-t border-gray-300"></div>
                     <span class="mx-4 text-gray-500 text-sm">atau</span>
                     <div class="flex-grow border-t border-gray-300"></div>
-                </div>
+                </div>-->
 
                 <!-- Register Link -->
-                <div class="mt-6 text-center">
+                <!-- <div class="mt-6 text-center">
                     <p class="text-gray-600">
                         Belum punya akun? 
                         <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition duration-200">
                             Daftar di sini
                         </a>
                     </p>
-                </div>
+                </div> -->
 
                 
 
