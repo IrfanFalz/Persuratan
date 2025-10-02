@@ -3,89 +3,128 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Persetujuan;
+use App\Models\Notifikasi;
+use Carbon\Carbon;
 
 class DashboardKepsekController extends Controller
 {
     public function index()
     {
-        $pending_approval = [
-            [
-                'id' => 1,
-                'teacher' => 'Maya Sari',
-                'nip' => '197801012005012001',
-                
-                'type' => 'Surat Cuti',
-                'reason' => 'Cuti melahirkan',
-                'duration' => '3 bulan',
-                'date_requested' => '2025-08-27',
-                // Detail data pemohon
-                'nama_lengkap' => 'Maya Sari, S.Pd',
-                'no_telp' => '081234567890',
-                // Detail surat
-                'keperluan' => 'Permohonan cuti melahirkan sesuai dengan ketentuan yang berlaku. Saya memerlukan waktu istirahat untuk mempersiapkan kelahiran anak pertama dan masa pemulihan pasca melahirkan.',
-                'hari' => 'Senin',
-                'tanggal' => '2025-09-15',
-                'jam' => '08:00 WIB',
-                'tempat' => 'SMK Negeri 4 Malang',
-                'guru_data' => [
-                    [
-                        'nama' => 'Dr. Siti Nurhaliza, M.Pd',
-                        'nip' => '196505151990032001',
-                        'keterangan' => 'Koordinator Bidang Akademik'
-                    ],
-                    [
-                        'nama' => 'Drs. Ahmad Fauzi, M.M',
-                        'nip' => '197203101998021003',
-                        'keterangan' => 'Kepala Tata Usaha'
-                    ]
-                ]
-            ]
-        ];
+        $pending_approval = Persetujuan::with([
+                'surat.pengguna',
+                'surat.suratDispensasi',
+                'surat.suratPerintahTugas'
+            ])
+            ->whereNull('disetujui')
+            ->get()
+            ->map(function ($item) {
+                $days = Carbon::parse($item->surat->dibuat_pada)->diffInDays(now());
 
+                // Ambil keperluan (alasan) dari surat dispensasi atau SPT
+                $reason = $item->surat->suratDispensasi->keperluan
+                            ?? $item->surat->suratPerintahTugas->keperluan
+                            ?? '-';
+
+                return [
+                    'id'            => $item->id_persetujuan,
+                    'teacher'       => $item->surat->pengguna->nama ?? 'Guru tidak diketahui',
+                    'nama_lengkap'  => $item->surat->pengguna->nama ?? 'Guru tidak diketahui',
+                    'nip'           => $item->surat->pengguna->nip ?? '-',
+                    'no_telp'       => $item->surat->pengguna->no_telp ?? '-',
+                    'type'          => $item->surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
+                    'reason'        => $reason, // alias untuk keperluan
+                    'keperluan'     => $reason,
+                    'hari'          => $item->surat->suratDispensasi->hari
+                                        ?? $item->surat->suratPerintahTugas->hari
+                                        ?? '-',
+                    'tanggal'       => $item->surat->dibuat_pada ?? '-',
+                    'jam'           => $item->surat->suratDispensasi->jam
+                                        ?? $item->surat->suratPerintahTugas->jam
+                                        ?? '-',
+                    'tempat'        => $item->surat->suratDispensasi->tempat
+                                        ?? $item->surat->suratPerintahTugas->tempat
+                                        ?? '-',
+                    'duration'      => $days === 0 ? 'Baru diajukan' : $days . ' hari',
+                    'date_requested'=> $item->surat->dibuat_pada,
+                    'guru_data'     => [], // nanti bisa diisi relasi guru terkait
+                ];
+            });
+
+        // Statistik bulanan
         $monthly_stats = [
-            'total_letters' => 45,
-            'approved_by_kepsek' => 12,
-            //'approved_by_ktu' => 30,
-            'rejected' => 4,
-            'pending' => 1
+            'total_letters'      => Persetujuan::count(),
+            'approved_by_kepsek' => Persetujuan::where('disetujui', 'ya')->count(),
+            'rejected'           => Persetujuan::where('disetujui', 'tidak')->count(),
+            'pending'            => Persetujuan::whereNull('disetujui')->count(),
         ];
 
-        $recent_activities = [
-            [
-                'action' => 'approved',
-                'teacher' => 'Eko Prasetyo',
-                'type' => 'Surat Tugas',
-                'date' => '2025-08-26 15:30:00'
-            ]
-        ];
+        // Aktivitas terbaru
+        $recent_activities = Persetujuan::with('surat.pengguna')
+            ->whereNotNull('disetujui')
+            ->orderBy('timestamp', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($item) {
+                $days = Carbon::parse($item->surat->dibuat_pada)->diffInDays(now());
+
+                $reason = $item->surat->suratDispensasi->keperluan
+                            ?? $item->surat->suratPerintahTugas->keperluan
+                            ?? '-';
+
+                return [
+                    'id'       => $item->id_persetujuan,
+                    'teacher'  => $item->surat->pengguna->nama ?? 'Guru tidak diketahui',
+                    'nip'      => $item->surat->pengguna->nip ?? '-',
+                    'no_telp'  => $item->surat->pengguna->no_telp ?? '-',
+                    'type'     => $item->surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
+                    'reason'   => $reason,
+                    'date'     => $item->timestamp,
+                    'status'   => $item->disetujui,
+                    'duration' => $days === 0 ? 'Baru diajukan' : $days . ' hari',
+                ];
+            });
 
         return view('dashboard-kepsek', compact('pending_approval', 'monthly_stats', 'recent_activities'))
-               ->with('message', session('message'));
+            ->with('message', session('message'))
+            ->with('status', session('status'));
     }
 
-   public function approval(Request $request)
+    public function approval(Request $request)
     {
-        $action = $request->input('action');
-        $id = $request->input('request_id');
+        $request->validate([
+            'id_persetujuan' => 'required|exists:persetujuan,id_persetujuan',
+            'action'         => 'required|in:approve,reject',
+        ]);
 
-        $pending_approval = [
-            1 => ['teacher' => 'Maya Sari'],
-            2 => ['teacher' => 'Eko Prasetyo'],
-        ];
+        $persetujuan = Persetujuan::with('surat.pengguna')->findOrFail($request->id_persetujuan);
+        $teacher = $persetujuan->surat->pengguna->nama ?? 'Guru tidak diketahui';
 
-        $teacher = $pending_approval[$id]['teacher'] ?? 'Guru tidak diketahui';
-
-        if ($action === 'approve') {
+        if ($request->action === 'approve') {
+            $persetujuan->disetujui = 'ya';
             $message = "Surat dari {$teacher} berhasil disetujui dan diteruskan ke TU.";
-            $status = 'success'; // Tambahkan status
+            $status = 'success';
+            $notifStatus = 'disetujui';
         } else {
+            $persetujuan->disetujui = 'tidak';
             $message = "Surat dari {$teacher} ditolak. Notifikasi dikirim ke guru terkait.";
-            $status = 'error'; // Tambahkan status
+            $status = 'error';
+            $notifStatus = 'ditolak';
         }
+
+        $persetujuan->save();
+
+        Notifikasi::create([
+            'id_surat'    => $persetujuan->id_surat,
+            'id_pengguna' => $persetujuan->surat->id_pengguna,
+            'pesan'       => $message,
+            'status'      => $notifStatus,
+            'dibaca'      => null,
+        ]);
 
         return redirect()->route('dashboard.kepsek')->with([
             'message' => $message,
-            'status' => $status
+            'status'  => $status,
         ]);
     }
 }

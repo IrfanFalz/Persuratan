@@ -94,7 +94,8 @@
 
             <!-- Register Form -->
             <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 card">
-                <form id="registerForm" class="space-y-5">
+                <form action="{{ route('register') }}" method="POST" id="registerForm" class="space-y-5">
+                    @csrf
                     <!-- Error/Success Messages -->
                     <div id="message" class="hidden"></div>
 
@@ -103,7 +104,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-user mr-2 text-blue-500"></i>Nama Lengkap
                         </label>
-                        <input type="text" name="nama_lengkap" id="nama_lengkap" required
+                        <input type="text" name="nama" id="nama_lengkap" required
                                placeholder="Masukkan nama lengkap"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                     </div>
@@ -123,7 +124,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-phone mr-2 text-blue-500"></i>Telepon
                         </label>
-                        <input type="text" name="telepon" id="telepon" required
+                        <input type="text" name="no_telp" id="telepon" required
                                placeholder="Masukkan nomor telepon"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                     </div>
@@ -136,9 +137,9 @@
                         <select name="role" id="role" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white">
                             <option value="" disabled selected hidden>Pilih Role</option>
-                            <option value="GURU">Guru</option>
-                            <option value="TU">Tata Usaha (TU)</option>
-                            <option value="KEPSEK">Kepala Sekolah</option>
+                            <option value="guru">Guru</option>
+                            <option value="tu">Tata Usaha (TU)</option>
+                            <option value="kepsek">Kepala Sekolah</option>
                         </select>
                     </div>
 
@@ -174,7 +175,7 @@
                             <i class="fas fa-lock mr-2 text-blue-500"></i>Konfirmasi Password
                         </label>
                         <div class="relative">
-                            <input type="password" name="confirm_password" id="confirm_password" required
+                            <input type="password" name="password_confirmation" id="confirm_password" required
                                    placeholder="Konfirmasi password"
                                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                             <button type="button" onclick="togglePassword('confirm_password', 'togglePassword2')" 
@@ -282,7 +283,6 @@
 
         // Form validation and submission
         document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
             
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());

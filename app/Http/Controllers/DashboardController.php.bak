@@ -22,7 +22,7 @@ class DashboardGuruController extends Controller
             ->orderBy('dibuat_pada', 'desc')
             ->get()
             ->map(function ($surat) {
-                // mapping status
+           
                 switch ($surat->status_berkas) {
                     case 'disetujui':
                         $status = 'approved';
@@ -37,7 +37,6 @@ class DashboardGuruController extends Controller
                         $status = 'pending';
                 }
 
-                // ambil data guru
                 $guruData = [];
                 if ($surat->suratDispensasi) {
                     $guruData = $surat->suratDispensasi->detail->map(function ($d) {
@@ -58,7 +57,7 @@ class DashboardGuruController extends Controller
                 }
 
                 return [
-                    'id'              => $surat->id_surat,
+                    'id'              => $surat->id_surat,  
                     'type'            => $surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
                     'date'            => $surat->dibuat_pada ?? now(),
                     'status'          => $status,
@@ -91,11 +90,11 @@ class DashboardGuruController extends Controller
                 ];
             });
 
-        $approvedCount   = $letter_requests->where('status', 'approved')->count();
-        $pendingCount    = $letter_requests->where('status', 'pending')->count();
-        $rejectedCount   = $letter_requests->where('status', 'rejected')->count();
+        $approvedCount = $letter_requests->where('status', 'approved')->count();
+        $pendingCount  = $letter_requests->where('status', 'pending')->count();
+        $rejectedCount = $letter_requests->where('status', 'rejected')->count();
         $processingCount = $letter_requests->where('status', 'processing')->count();
-        $totalCount      = $letter_requests->count();
+        $totalCount    = $letter_requests->count();
 
         $notifikasi = Notifikasi::where('id_pengguna', $userId)
             ->latest('created_at')

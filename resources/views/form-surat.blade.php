@@ -142,8 +142,9 @@
 
             <!-- Form - Mobile Optimized -->
             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-                <form method="POST" class="space-y-6" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('surat.store') }}" class="space-y-6" enctype="multipart/form-data">
                 @csrf
+                    <input type="hidden" name="jenis" value="{{ $letter_type === 'surat-perintah-tugas' ? 'spt' : ($letter_type === 'surat-dispensasi' ? 'dispensasi' : '') }}">
                     <!-- Data Pemohon -->
                     <div class="border-b border-gray-200 pb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -168,7 +169,7 @@
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">NIP</label>
                                 <div class="relative">
-                                    <input type="text" id="nip-input" name="nip" placeholder="NIP akan terisi otomatis" required readonly
+                                    <input type="text" id="nip-input" name="nip" placeholder="NIP akan terisi otomatis" required 
                                         class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                     <button type="button" id="search-guru-btn-2" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800">
                                         <i class="fas fa-search"></i>
@@ -240,7 +241,7 @@
                                             </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
-                                                <input type="text" name="nip[]" placeholder="NIP akan terisi otomatis" required readonly
+                                                <input type="text" name="nip[]" placeholder="NIP akan terisi otomatis" required 
                                                     class="guru-nip-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                             </div>
                                             <div class="space-y-1">

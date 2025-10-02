@@ -88,10 +88,10 @@
 
                 <!-- Logout -->
                 <div class="p-4 border-t flex-shrink-0">
-                    <a href="{{ route('logout') }}" class="flex items-center px-4 py-3 text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200">
-                        <i class="fas fa-sign-out-alt mr-3 text-lg"></i>
-                        <span class="font-medium">Logout</span>
-                    </a>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit">Logout</button>
+                    </form>
                 </div>
             </div>
         </aside>
