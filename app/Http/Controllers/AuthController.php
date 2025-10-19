@@ -28,40 +28,6 @@ class AuthController extends Controller
 
     public function showLoginForm()
     {
-<<<<<<< Updated upstream
-        $users = [
-            //'ktu' => ['password' => 'ktu123', 'role' => 'KTU', 'name' => 'Budi Santoso'],
-            '0111' => ['password' => 'tu123', 'role' => 'TU', 'name' => 'Siti Aminah'],
-            '0222' => ['password' => 'kepsek123', 'role' => 'KEPSEK', 'name' => 'Dr. Ahmad Wijaya'],
-            '0333' => ['password' => 'guru123', 'role' => 'GURU', 'name' => 'Maya Sari'],
-            '0444' => ['password' => 'admin123', 'role' => 'ADMIN', 'name' => 'Administrator'],
-        ];
-
-        if ($request->isMethod('post')) {
-            $username = $request->input('username');
-            $password = $request->input('password');
-
-            if (isset($users[$username]) && $users[$username]['password'] === $password) {
-                session([
-                    'user' => $username,
-                    'role' => $users[$username]['role'],
-                    'name' => $users[$username]['name'],
-                ]);
-
-                switch ($users[$username]['role']) {
-                    case 'GURU': return redirect()->route('dashboard.guru');
-                   // case 'KTU': return redirect()->route('dashboard.ktu');
-                    case 'TU': return redirect()->route('dashboard.tu');
-                    case 'KEPSEK': return redirect()->route('dashboard.kepsek');
-                    case 'ADMIN': return redirect()->route('dashboard.admin');
-                }
-            } else {
-                return back()->with('error', 'Username atau password salah!');
-            }
-        }
-
-=======
->>>>>>> Stashed changes
         return view('login');
     }
 
@@ -76,7 +42,9 @@ class AuthController extends Controller
             'username' => 'required|unique:pengguna,username',
             'nama' => 'required',
             'password' => 'required|min:6|confirmed',
-            'role' => 'required|in:admin,guru,kepsek,tu'
+            'role' => 'required|in:admin,guru,kepsek,tu',
+            'nip' => 'nullable',
+            'no_telp' => 'nullable'
         ]);
 
         $user = Pengguna::create([
@@ -91,6 +59,7 @@ class AuthController extends Controller
         Auth::login($user);
         $req->session()->regenerate();
 
+        // Optional: Store additional session data if needed
         session([
             'id_pengguna' => $user->id_pengguna ?? $user->id,
             'name' => $user->nama,
@@ -111,15 +80,28 @@ class AuthController extends Controller
             $req->session()->regenerate();
 
             $user = Auth::user();
+            
+            // Optional: Store additional session data if needed
             session([
                 'id_pengguna' => $user->id_pengguna ?? $user->id,
-                'name' => $user->nama ?? ($user->name ?? ''),
+                'name' => $user->nama ?? $user->name ?? '',
                 'role' => strtoupper($user->role ?? '')
             ]);
 
             return redirect()->route('dashboard.' . strtolower($user->role));
         }
 
-        return back()->with('error', 'Username atau password salah!');
+        return back()->withErrors([
+            'username' => 'Username atau password salah!'
+        ])->withInput($req->only('username'));
+    }
+
+    public function logout(Request $req)
+    {
+        Auth::logout();
+        $req->session()->invalidate();
+        $req->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Berhasil logout!');
     }
 }
