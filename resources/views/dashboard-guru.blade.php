@@ -243,6 +243,34 @@
     </nav>
 
     <div class="max-w-7xl mx-auto py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
+        {{-- 🔔 Pesan sukses / error --}}
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 relative" role="alert">
+                <strong class="font-bold">Berhasil!</strong>
+                <span class="block sm:inline">{{ session('success') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.remove()">
+                    <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Tutup</title>
+                        <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 10-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
+                    </svg>
+                </span>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 relative" role="alert">
+                <strong class="font-bold">Gagal!</strong>
+                <span class="block sm:inline">{{ session('error') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.remove()">
+                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Tutup</title>
+                        <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 10-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
+                    </svg>
+                </span>
+            </div>
+        @endif
         <!-- Welcome Card -->
         <div class="welcome-card">
             <h2 class="text-xl sm:text-2xl font-bold mb-2">Selamat Datang, {{ session('name') }}!</h2>
@@ -429,7 +457,7 @@
                                 <td class="text-sm text-gray-500">
                                     {{ date('d/m/Y', strtotime($request['date'])) }}
                                 </td>
-                                <td>
+                                <td class="status-cell">
                                     @if($request['status'] === 'approved')
                                         <span class="status-approved">
                                             <i class="fas fa-check mr-1"></i>Disetujui
@@ -717,6 +745,33 @@
                 closeModal();
             }
         });
+    </script>
+    <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+    <script src="{{ mix('/js/app.js') }}"></script>
+
+    <script>
+        Echo.channel('surat-status')
+            .listen('SuratStatusUpdated', (e) => {
+                console.log('Surat diupdate:', e.surat);
+
+                const suratId = e.surat.id_surat;
+                const newStatus = e.surat.status_berkas;
+
+                const row = document.querySelector(`[data-surat-id="${suratId}"]`);
+                if (row) {
+                    const statusCell = row.querySelector('.status-cell');
+                    const progressDots = row.querySelectorAll('.progress-dot');
+
+                    if (newStatus === 'approve') {
+                        statusCell.innerHTML = `<span class="status-approved"><i class="fas fa-check mr-1"></i>Disetujui</span>`;
+                        progressDots.forEach(dot => dot.classList.add('bg-green-500'));
+                    } else if (newStatus === 'decline') {
+                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times mr-1"></i>Ditolak</span>`;
+                    } else {
+                        statusCell.innerHTML = `<span class="status-pending"><i class="fas fa-clock mr-1"></i>Menunggu</span>`;
+                    }
+                }
+            });
     </script>
 </body>
 </html>

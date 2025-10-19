@@ -494,7 +494,7 @@
                         </button>
 
                         <!-- Form Approve -->
-                        <form action="{{ route('persetujuan.update', $request['id']) }}" method="POST" class="inline">
+                        <form id="approveForm" action="" method="POST" class="inline">
                             @csrf
                             <input type="hidden" name="disetujui" value="ya">
                             <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
@@ -503,7 +503,7 @@
                         </form>
 
                         <!-- Form Reject -->
-                        <form action="{{ route('persetujuan.update', $request['id']) }}" method="POST" class="inline">
+                        <form id="rejectForm" action="" method="POST" class="inline">
                             @csrf
                             <input type="hidden" name="disetujui" value="tidak">
                             <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
@@ -622,32 +622,21 @@
     <script>
         let currentRequestData = null;
 
-        
 
         function openDetailModal(requestData) {
             currentRequestData = requestData || {};
 
-            document.getElementById('detail_nama_lengkap').textContent = requestData.nama_lengkap || requestData.teacher || '-';
+            document.getElementById('detail_nama_lengkap').textContent = requestData.nama_lengkap || '-';
             document.getElementById('detail_nip').textContent = requestData.nip || '-';
             document.getElementById('detail_no_telp').textContent = requestData.no_telp || '-';
-
             document.getElementById('detail_keperluan').textContent = requestData.reason || '-';
-
             document.getElementById('detail_hari').textContent = requestData.hari || '-';
+            document.getElementById('detail_tanggal').textContent = formatDate(requestData.date_requested);
             document.getElementById('detail_jam').textContent = requestData.jam || '-';
             document.getElementById('detail_tempat').textContent = requestData.tempat || '-';
 
-            if (requestData.tanggal || requestData.date_requested) {
-                const dateStr = requestData.tanggal || requestData.date_requested;
-                let parsed = new Date(dateStr);
-                if (!isNaN(parsed)) {
-                    document.getElementById('detail_tanggal').textContent = formatDate(dateStr);
-                } else {
-                    document.getElementById('detail_tanggal').textContent = dateStr;
-                }
-            } else {
-                document.getElementById('detail_tanggal').textContent = '-';
-            }
+            document.getElementById('approveForm').action = `/persetujuan/${requestData.id}`;
+            document.getElementById('rejectForm').action = `/persetujuan/${requestData.id}`;
 
             document.getElementById('detailModal').style.display = 'block';
             document.body.style.overflow = 'hidden';

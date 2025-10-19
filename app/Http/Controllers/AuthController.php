@@ -15,53 +15,24 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
-        $role = Auth::user()->role;
-        switch ($role) {
-            case 'guru': return redirect()->route('dashboard.guru');
-            case 'tu': return redirect()->route('dashboard.tu');
-            case 'kepsek': return redirect()->route('dashboard.kepsek');
-            case 'admin': return redirect()->route('dashboard.admin');
-        }
+        $role = strtoupper(Auth::user()->role);
 
-        return redirect()->route('login');
+        switch ($role) {
+            case 'GURU': 
+                return redirect()->route('dashboard.guru');
+            case 'TU': 
+                return redirect()->route('dashboard.tu');
+            case 'KEPSEK': 
+                return redirect()->route('dashboard.kepsek');
+            case 'ADMIN': 
+                return redirect()->route('dashboard.admin');
+            default:
+                abort(403, 'Role tidak dikenali');
+        }
     }
 
     public function showLoginForm()
     {
-<<<<<<< Updated upstream
-        $users = [
-            //'ktu' => ['password' => 'ktu123', 'role' => 'KTU', 'name' => 'Budi Santoso'],
-            '0111' => ['password' => 'tu123', 'role' => 'TU', 'name' => 'Siti Aminah'],
-            '0222' => ['password' => 'kepsek123', 'role' => 'KEPSEK', 'name' => 'Dr. Ahmad Wijaya'],
-            '0333' => ['password' => 'guru123', 'role' => 'GURU', 'name' => 'Maya Sari'],
-            '0444' => ['password' => 'admin123', 'role' => 'ADMIN', 'name' => 'Administrator'],
-        ];
-
-        if ($request->isMethod('post')) {
-            $username = $request->input('username');
-            $password = $request->input('password');
-
-            if (isset($users[$username]) && $users[$username]['password'] === $password) {
-                session([
-                    'user' => $username,
-                    'role' => $users[$username]['role'],
-                    'name' => $users[$username]['name'],
-                ]);
-
-                switch ($users[$username]['role']) {
-                    case 'GURU': return redirect()->route('dashboard.guru');
-                   // case 'KTU': return redirect()->route('dashboard.ktu');
-                    case 'TU': return redirect()->route('dashboard.tu');
-                    case 'KEPSEK': return redirect()->route('dashboard.kepsek');
-                    case 'ADMIN': return redirect()->route('dashboard.admin');
-                }
-            } else {
-                return back()->with('error', 'Username atau password salah!');
-            }
-        }
-
-=======
->>>>>>> Stashed changes
         return view('login');
     }
 

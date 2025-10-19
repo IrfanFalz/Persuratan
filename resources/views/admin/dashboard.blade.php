@@ -303,19 +303,19 @@
                         <tr class="table-row-hover">
                             <td class="py-4 px-6">
                                 <div>
-                                    <div class="font-semibold text-gray-900 mb-1">{{ $surat['pengaju'] }}</div>
-                                    <div class="text-sm text-muted">NIP: {{ $surat['nip'] }}</div>
-                                    <div class="text-sm text-muted">{{ $surat['telp'] }}</div>
+                                    <div class="font-semibold text-gray-900 mb-1">{{ $surat->pengguna->nama ?? '-' }}</div>
+                                    <div class="text-sm text-muted">NIP: {{ $surat->pengguna->nip ?? '-' }}</div>
+                                    <div class="text-sm text-muted">{{ $surat->pengguna->no_telp ?? '-' }}</div>
                                 </div>
                             </td>
                             <td class="py-4 px-6">
                                 <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full 
                                     {{ $surat['jenis'] == 'Surat Dispensasi' ? 'badge-blue' : 'badge-purple' }}">
-                                    {{ $surat['jenis'] }}
+                                    {{ $surat->jenis ?? '-' }}
                                 </span>
                             </td>
                             <td class="py-4 px-6 text-sm font-medium text-gray-700">
-                                {{ \Carbon\Carbon::parse($surat['tanggal'])->format('d/m/Y') }}
+                                {{ \Carbon\Carbon::parse($surat->dibuat_pada)->format('d/m/Y') }}
                             </td>
                         </tr>
                         @endforeach
@@ -352,19 +352,19 @@
                         <tr class="table-row-hover">
                             <td class="py-4 px-6">
                                 <div>
-                                    <div class="font-semibold text-gray-900 mb-1">{{ $surat['pengaju'] }}</div>
-                                    <div class="text-sm text-muted">NIP: {{ $surat['nip'] }}</div>
-                                    <div class="text-sm text-muted">{{ $surat['telp'] }}</div>
+                                    <div class="font-semibold text-gray-900 mb-1">{{ $surat->pengguna->nama ?? '-' }}</div>
+                                    <div class="text-sm text-muted">NIP: {{ $surat->pengguna->nip ?? '-' }}</div>
+                                    <div class="text-sm text-muted">{{ $surat->pengguna->no_telp ?? '-' }}</div>
                                 </div>
                             </td>
                             <td class="py-4 px-6">
                                 <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full 
                                     {{ $surat['jenis'] == 'Surat Dispensasi' ? 'badge-blue' : 'badge-purple' }}">
-                                    {{ $surat['jenis'] }}
+                                    {{ $surat->jenis ?? '-' }}
                                 </span>
                             </td>
                             <td class="py-4 px-6 text-sm font-medium text-gray-700">
-                                {{ \Carbon\Carbon::parse($surat['tanggal'])->format('d/m/Y') }}
+                                {{ \Carbon\Carbon::parse($surat->dibuat_pada)->format('d/m/Y') }}
                             </td>
                         </tr>
                         @endforeach
