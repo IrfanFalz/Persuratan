@@ -68,5 +68,6 @@ Route::middleware(['auth','checkRole:ADMIN'])->group(function () {
     Route::get('/admin/template/{id}', [DashboardAdminController::class, 'viewTemplate'])->name('admin.view-template');
 
     Route::get('/admin/kelola-guru', [DashboardAdminController::class, 'kelolaGuru'])->name('admin.kelola-guru');
+    Route::delete('/admin/users/{id}', [DashboardAdminController::class, 'usersDelete'])->name('admin.users.delete');
     Route::get('/admin/kelola-surat', [DashboardAdminController::class, 'kelolaSurat'])->name('admin.kelola-surat');
 });

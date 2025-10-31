@@ -162,18 +162,18 @@
                 <tbody class="divide-y divide-gray-100" id="tableBody">
                     @foreach($historySuratPaginated as $index => $surat)
                     <tr class="hover:bg-gray-50 transition-colors duration-200" 
-                        data-pengaju="{{ strtolower($surat['pengaju']) }}" 
-                        data-jenis="{{ $surat['jenis'] }}" 
-                        data-status="{{ $surat['status'] }}"
-                        data-tanggal="{{ $surat['tanggal'] }}">
+                        data-pengaju="{{ strtolower($surat->pengguna->nama_lengkap ?? '-') }}" 
+                        data-jenis="{{ $surat->template->nama_template ?? '-' }}" 
+                        data-status="{{ $surat->status }}"
+                        data-tanggal="{{ $surat->dibuat_pada }}">
                         <td class="px-6 py-4 text-sm text-gray-600">{{ ($pagination['current_page'] - 1) * $pagination['per_page'] + $index + 1 }}</td>
                         <td class="px-6 py-4">
-                            <div class="font-semibold text-gray-900">{{ $surat['pengaju'] }}</div>
+                            <div class="font-semibold text-gray-900">{{ $surat->pengguna->nama_lengkap ?? '-' }}</div>
                         </td>
                         <td class="px-6 py-4">
                             <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
                                 {{ $surat['jenis'] == 'Surat Dispensasi' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                {{ $surat['jenis'] }}
+                                {{ $surat->template->nama_template ?? '-' }}
                             </span>
                         </td>
                         <td class="px-6 py-4">
@@ -185,7 +185,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ \Carbon\Carbon::parse($surat['tanggal'])->format('d/m/Y') }}
+                            {{ \Carbon\Carbon::parse($surat->dibuat_pada)->format('d/m/Y') }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
@@ -208,7 +208,7 @@
                                 @endif
                             </div>
                         </td>
-                    </tr>
+                    </>
                     @endforeach
                 </tbody>
             </table>

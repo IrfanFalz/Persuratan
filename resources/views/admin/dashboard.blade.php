@@ -223,21 +223,29 @@
                             <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
                             <span class="text-gray-700 font-medium">Surat Baru</span>
                         </div>
-                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full text-sm">3</span>
+                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full text-sm">
+                            {{ $ringkasan['baru'] }}
+                        </span>
                     </div>
+
                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <div class="flex items-center">
                             <div class="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
                             <span class="text-gray-700 font-medium">Menunggu Persetujuan</span>
                         </div>
-                        <span class="font-bold text-orange-600 bg-orange-100 px-3 py-1 rounded-full text-sm">5</span>
+                        <span class="font-bold text-orange-600 bg-orange-100 px-3 py-1 rounded-full text-sm">
+                            {{ $ringkasan['menunggu'] }}
+                        </span>
                     </div>
+                    
                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <div class="flex items-center">
                             <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                             <span class="text-gray-700 font-medium">Selesai Hari Ini</span>
                         </div>
-                        <span class="font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full text-sm">2</span>
+                        <span class="font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full text-sm">
+                            {{ $ringkasan['selesai_hari'] }}
+                        </span>
                     </div>
                 </div>
             </div>
