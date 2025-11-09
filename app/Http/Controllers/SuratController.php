@@ -5,69 +5,138 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Surat;
 use App\Models\Persetujuan;
-use App\Models\SuratDispensasi;
-use App\Models\SuratPerintahTugas;
+use App\Models\Notifikasi;
 use App\Models\Pengguna;
-use App\Helpers\NotifikasiHelper;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Events\SuratCreated;
+use App\Events\SuratStatusUpdated;
+use App\Events\NotifikasiCreated;
 
 class SuratController extends Controller
 {
-    public function store(Request $req)
+    public function dashboard()
     {
-        $req->validate([
-            'jenis'     => 'required|in:dispensasi,spt',
-            'keperluan' => 'required'
-        ]);
+        $user = Auth::user();
 
-        $surat = Surat::create([
-            'id_pengguna'   => auth()->id(),
-            'status_berkas' => 'diajukan'
-        ]);
-
-        $reviewer = Pengguna::whereIn('role', ['ktu', 'kepsek'])->first();
-
-        $pers = Persetujuan::create([
-            'id_surat'    => $surat->id_surat,
-            'id_pengguna' => $reviewer->id_pengguna,
-            'disetujui'   => null
-        ]);
-
-        if ($req->jenis == 'dispensasi') {
-            SuratDispensasi::create([
-                'id_surat'      => $surat->id_surat,
-                'id_persetujuan'=> $pers->id_persetujuan,
-                'keperluan'     => $req->keperluan,
-                'tempat'        => $req->tempat,
-                'tanggal'       => $req->tanggal,
-                'jam'           => $req->jam,
-                'hari'          => $req->hari
-            ]);
-        } elseif ($req->jenis == 'spt') {
-            SuratPerintahTugas::create([
-                'id_surat'      => $surat->id_surat,
-                'id_persetujuan'=> $pers->id_persetujuan,
-                'keperluan'     => $req->keperluan,
-                'tempat'        => $req->tempat,
-                'tanggal'       => $req->tanggal,
-                'jam'           => $req->jam,
-                'hari'          => $req->hari
-            ]);
+        if ($user->role === 'guru') {
+            $surat = Surat::with(['persetujuan', 'suratDispensasi', 'suratPerintahTugas'])
+                ->where('id_pengguna', $user->id_pengguna)
+                ->orderByDesc('dibuat_pada')
+                ->get();
+        } else {
+            $surat = Surat::with(['persetujuan', 'pengguna'])
+                ->orderByDesc('dibuat_pada')
+                ->get();
         }
 
-        NotifikasiHelper::insert(
-            $surat->id_surat,
-            $reviewer->id_pengguna,
-            'Ada surat baru menunggu persetujuan',
-            null
-        );
+        $notifikasi = Notifikasi::where('id_pengguna', $user->id_pengguna)
+            ->orderByDesc('dibuat_pada')
+            ->get();
 
-        return redirect()->route('form.surat', ['type' => $req->jenis])
-            ->with('success_message', 'Surat berhasil diajukan');
+        return view('guru.dashboard', compact('surat', 'notifikasi'));
     }
 
-    public function index()
+    public function create()
     {
-        $surat = Surat::latest('id_surat')->take(5)->get();
-        return view('surat.index', compact('surat'));
+        return view('surat.create');
+    }
+
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'jenis' => 'required|string',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $surat = Surat::create([
+                'id_pengguna'   => $user->id_pengguna,
+                'status_berkas' => 'pending',
+                'dibuat_pada'   => now(),
+            ]);
+
+            $persetujuan = Persetujuan::create([
+                'id_surat'    => $surat->id_surat,
+                'id_pengguna' => $user->id_pengguna,
+                'disetujui'   => null,
+                'timestamp'   => now(),
+            ]);
+
+            $surat->update(['id_persetujuan' => $persetujuan->id_persetujuan]);
+
+            $roles = ['TU', 'KEPSEK', 'ADMIN'];
+            $targets = Pengguna::whereIn(DB::raw('UPPER(role)'), $roles)->get();
+
+            foreach ($targets as $target) {
+                $notif = Notifikasi::create([
+                    'id_pengguna' => $target->id_pengguna,
+                    'id_surat'    => $surat->id_surat,
+                    'pesan'       => "Surat baru dari {$user->nama}.",
+                    'status_baca' => 0,
+                    'dibuat_pada' => now(),
+                ]);
+
+                broadcast(new NotifikasiCreated($notif))->toOthers();
+            }
+
+            DB::commit();
+
+            broadcast(new SuratCreated($surat))->toOthers();
+
+            return redirect()
+                ->route('dashboard.guru')
+                ->with('success', 'Surat berhasil diajukan dan menunggu persetujuan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal mengajukan surat: ' . $e->getMessage());
+        }
+    }
+
+    public function updateStatus(Request $req, $id)
+    {
+        $user = Auth::user();
+
+        $req->validate([
+            'status_berkas' => 'required|in:pending,approve,decline,selesai',
+        ]);
+
+        $surat = Surat::findOrFail($id);
+
+        if (!in_array(strtolower($user->role), ['kepsek', 'tu', 'admin'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $surat->update(['status_berkas' => $req->status_berkas]);
+
+        Persetujuan::create([
+            'id_surat'    => $surat->id_surat,
+            'id_pengguna' => $user->id_pengguna,
+            'disetujui'   => $req->status_berkas === 'approve' ? 'ya' : 'tidak',
+            'timestamp'   => now(),
+        ]);
+
+        $notif = Notifikasi::create([
+            'id_pengguna' => $surat->id_pengguna,
+            'id_surat'    => $surat->id_surat,
+            'pesan'       => "Surat Anda telah diperbarui statusnya menjadi {$req->status_berkas}.",
+            'status_baca' => 0,
+            'dibuat_pada' => now(),
+        ]);
+
+        broadcast(new NotifikasiCreated($notif))->toOthers();
+        broadcast(new SuratStatusUpdated($surat))->toOthers();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status surat berhasil diperbarui.',
+            'new_status' => $req->status_berkas
+        ]);
     }
 }

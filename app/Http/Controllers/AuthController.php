@@ -15,15 +15,20 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
-        $role = Auth::user()->role;
-        switch ($role) {
-            case 'guru': return redirect()->route('dashboard.guru');
-            case 'tu': return redirect()->route('dashboard.tu');
-            case 'kepsek': return redirect()->route('dashboard.kepsek');
-            case 'admin': return redirect()->route('dashboard.admin');
-        }
+        $role = strtoupper(Auth::user()->role);
 
-        return redirect()->route('login');
+        switch ($role) {
+            case 'GURU': 
+                return redirect()->route('dashboard.guru');
+            case 'TU': 
+                return redirect()->route('dashboard.tu');
+            case 'KEPSEK': 
+                return redirect()->route('dashboard.kepsek');
+            case 'ADMIN': 
+                return redirect()->route('dashboard.admin');
+            default:
+                abort(403, 'Role tidak dikenali');
+        }
     }
 
     public function showLoginForm()
