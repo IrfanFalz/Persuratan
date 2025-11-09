@@ -12,6 +12,8 @@ class DashboardAdminController extends Controller
 {
     public function index()
     {
+        $today = now()->toDateString();
+
         $stats = [
             'total_surat'   => Surat::count(),
             'surat_selesai' => Surat::where('status_berkas', 'selesai')->count(),
@@ -20,8 +22,8 @@ class DashboardAdminController extends Controller
             'jumlah_kepsek' => Pengguna::where('role', 'KEPSEK')->count(),
         ];
 
-        $suratTerbaru = Surat::with('pengguna')->orderBy('dibuat_pada','desc')->take(5)->get();
-        $suratSelesai = Surat::with('pengguna')->where('status_berkas','selesai')->orderBy('dibuat_pada','desc')->take(5)->get();
+        $suratTerbaru = Surat::with('pengguna')->orderBy('dibuat_pada', 'desc')->take(5)->get();
+        $suratSelesai = Surat::with('pengguna')->where('status_berkas', 'selesai')->orderBy('dibuat_pada', 'desc')->take(5)->get();
 
         $chartData = [
             'labels'   => ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'],
@@ -31,10 +33,16 @@ class DashboardAdminController extends Controller
 
         for ($i = 1; $i <= 12; $i++) {
             $chartData['diajukan'][] = Surat::whereMonth('dibuat_pada', $i)->count();
-            $chartData['selesai'][]  = Surat::whereMonth('dibuat_pada', $i)->where('status_berkas','selesai')->count();
+            $chartData['selesai'][]  = Surat::whereMonth('dibuat_pada', $i)->where('status_berkas', 'selesai')->count();
         }
 
-        return view('admin.dashboard', compact('stats','suratTerbaru','suratSelesai','chartData'));
+        $ringkasan = [
+            'baru'         => Surat::whereDate('dibuat_pada', $today)->count(),
+            'menunggu'     => Surat::where('status_berkas', 'pending')->whereDate('dibuat_pada', $today)->count(),
+            'selesai_hari' => Surat::where('status_berkas', 'selesai')->whereDate('updated_at', $today)->count(),
+        ];
+
+        return view('admin.dashboard', compact('stats','suratTerbaru','suratSelesai','chartData','ringkasan'));
     }
 
     public function usersIndex()
@@ -46,22 +54,23 @@ class DashboardAdminController extends Controller
     public function usersStore(Request $req)
     {
         $req->validate([
-            'username' => 'required|unique:pengguna',
-            'nama'     => 'required',
+            'nama' => 'required',
+            'nip' => 'required|unique:pengguna,nip',
             'password' => 'required|min:6',
-            'role'     => 'required|in:ADMIN,GURU,KEPSEK,TU,KTU'
+            'role' => 'required|in:ADMIN,GURU,KEPSEK,TU,KTU',
+            'telp' => 'nullable|string|max:20',
         ]);
 
         Pengguna::create([
-            'username' => $req->username,
-            'no_telp'  => $req->no_telp,
-            'nip'      => $req->nip,
-            'nama'     => $req->nama,
+            'username' => $req->nip, 
+            'no_telp' => $req->telp,
+            'nip' => $req->nip,
+            'nama' => $req->nama,
             'password' => Hash::make($req->password),
-            'role'     => $req->role
+            'role' => $req->role,
         ]);
 
-        return back()->with('success_message','User berhasil dibuat');
+        return redirect()->route('admin.kelola-guru')->with('success_message', 'Data guru berhasil ditambahkan!');
     }
 
     public function usersUpdate(Request $req, $id)
@@ -69,6 +78,8 @@ class DashboardAdminController extends Controller
         $user = Pengguna::findOrFail($id);
 
         $data = $req->only(['username','no_telp','nip','nama','role']);
+        $data['username'] = $req->nip;
+        
         if ($req->filled('password')) {
             $data['password'] = Hash::make($req->password);
         }
@@ -125,9 +136,20 @@ class DashboardAdminController extends Controller
 
     public function historySurat()
     {
-        $historySurat = Surat::with('pengguna')->orderBy('dibuat_pada','desc')->paginate(10);
-        return view('admin.history-surat', compact('historySurat'));
+        $historySuratPaginated = \App\Models\Surat::with(['pengguna', 'template'])
+            ->orderBy('dibuat_pada', 'desc')
+            ->paginate(10);
+
+        $pagination = [
+            'current_page' => $historySuratPaginated->currentPage(),
+            'last_page'    => $historySuratPaginated->lastPage(),
+            'per_page'     => $historySuratPaginated->perPage(),
+            'total'        => $historySuratPaginated->total(),
+        ];
+
+        return view('admin.history-surat', compact('historySuratPaginated', 'pagination'));
     }
+
     public function kelolaGuru()
     {
         $dataGuru = Pengguna::whereIn('role', ['GURU','KEPSEK','TU'])->get();

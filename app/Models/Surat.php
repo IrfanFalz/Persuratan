@@ -14,12 +14,17 @@ class Surat extends Model
         'id_pengguna',
         'id_persetujuan',
         'status_berkas',
-        'dibuat_pada'
+        'dibuat_pada',
+        'id_template'
     ];
 
     public function pengguna()
     {
         return $this->belongsTo(Pengguna::class, 'id_pengguna', 'id_pengguna');
+    }
+
+    public function template() {
+        return $this->belongsTo(TemplateSurat::class, 'id_template', 'id');
     }
 
     public function persetujuan()
