@@ -747,8 +747,7 @@
         });
     </script>
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
-    <script src="{{ mix('/js/app.js') }}"></script>
-
+    <script src="{{ asset('js/app.js') }}"></script>
     <script>
         Echo.channel('surat-status')
             .listen('SuratStatusUpdated', (e) => {

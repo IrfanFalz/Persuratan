@@ -2,146 +2,131 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Surat;
+use App\Models\SuratDispensasi;
+use App\Models\SuratPerintahTugas;
+use App\Models\Notifikasi;
+use App\Models\Pengguna;
+use App\Helpers\NotifikasiHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardTuController extends Controller
 {
     public function index()
     {
-        $approved_letters = [
-            [
-                'id' => 1,
-                'teacher' => 'Maya Sari',
-                'nip' => '197801012005012001',
-                'phone' => '081234567890',
-                'full_name' => 'Maya Sari, S.Pd',
-                'type' => 'Surat Tugas',
-                'approved_date' => '2025-08-26',
-                'approved_by' => 'Kepala Sekolah',
-                'status' => 'approved',
-                'keperluan' => 'Pelatihan Kurikulum Merdeka di Jakarta',
-                'tempat' => 'Hotel Mercure Jakarta',
-                'tanggal_tugas' => '2025-09-01',
-                'hari' => 'Senin',
-                'jam' => '08:00 - 16:00',
-                'waktu' => '08:00 - 16:00',
-                'guru_list' => [
-                    [
-                        'nama' => 'Maya Sari',
-                        'nip' => '197801012005012001',
-                        'keterangan' => 'Peserta Pelatihan'
-                    ],
-                    [
-                        'nama' => 'Budi Santoso',
-                        'nip' => '198203152009011003',
-                        'keterangan' => 'Pendamping'
-                    ]
-                ]
-            ],
-            [
-                'id' => 2,
-                'teacher' => 'Eko Prasetyo',
-                'nip' => '198205152008011002',
-                'phone' => '081234567891',
-                'full_name' => 'Eko Prasetyo, S.Pd, M.Pd',
-                'type' => 'Surat Perintah Tugas',
-                'approved_date' => '2025-08-25',
-                'approved_by' => 'Kepala Sekolah',
-                'status' => 'approved',
-                'keperluan' => 'Mengawas Ujian Nasional CBT di SMP Negeri 2 Surabaya',
-                'tempat' => 'SMP Negeri 2 Surabaya',
-                'tanggal_tugas' => '2025-09-05',
-                'hari' => 'Kamis',
-                'jam' => '07:00 - 15:00',
-                'waktu' => '07:00 - 15:00',
-                'guru_list' => [
-                    [
-                        'nama' => 'Eko Prasetyo',
-                        'nip' => '198205152008011002',
-                        'keterangan' => 'Pengawas Utama'
-                    ],
-                    [
-                        'nama' => 'Sri Wahyuni',
-                        'nip' => '199012102015012002',
-                        'keterangan' => 'Pengawas Cadangan'
-                    ]
-                ]
-            ]
-        ];
+        // SURAT YANG SUDAH DISETUJUI KEPSEK, TAPI BELUM SELESAI (status: disetujui)
+        $approved_letters = Surat::with(['pengguna', 'suratDispensasi', 'suratPerintahTugas'])
+            ->where('status_berkas', 'disetujui')
+            ->latest()
+            ->get()
+            ->map(function ($surat) {
+                $detail = $surat->suratDispensasi ?? $surat->suratPerintahTugas;
 
-        // Semua completed letters otomatis pickup_notified = true
-        $completed_letters = [
-            [
-                'id' => 3,
-                'teacher' => 'Siti Nurjanah',
-                'nip' => '198506152010012003',
-                'phone' => '081234567892',
-                'full_name' => 'Siti Nurjanah, S.Pd',
-                'type' => 'Surat Dispensasi',
-                'subject' => 'Bahasa Indonesia',
-                'completed_date' => '2025-08-26 14:30:00',
-                'status' => 'completed',
-                'pickup_notified' => true, // Selalu true karena otomatis diberitahu saat selesai
-                'keperluan' => 'Menghadiri pernikahan saudara kandung di Malang',
-                'tempat' => 'Malang, Jawa Timur',
-                'tanggal_tugas' => '2025-08-30',
-                'hari' => 'Jumat',
-                'jam' => '08:00 - 16:00',
-                'guru_list' => [
-                    [
-                        'nama' => 'Siti Nurjanah',
-                        'nip' => '198506152010012003',
-                        'keterangan' => 'Yang memohon dispensasi'
-                    ]
-                ]
-            ],
-            [
-                'id' => 4,
-                'teacher' => 'Rahman Hakim',
-                'nip' => '197912102006011001',
-                'phone' => '081234567893',
-                'full_name' => 'Rahman Hakim, S.Pd, M.Si',
-                'type' => 'Surat Cuti',
-                'subject' => 'Kimia',
-                'completed_date' => '2025-08-25 16:45:00',
-                'status' => 'completed',
-                'pickup_notified' => true, // Selalu true karena otomatis diberitahu saat selesai
-                'keperluan' => 'Cuti melahirkan istri',
-                'tempat' => 'Rumah Sakit Dr. Soetomo Surabaya',
-                'tanggal_tugas' => '2025-09-02',
-                'hari' => 'Senin',
-                'jam' => 'Seharian',
-                'guru_list' => [
-                    [
-                        'nama' => 'Rahman Hakim',
-                        'nip' => '197912102006011001',
-                        'keterangan' => 'Yang mengajukan cuti'
-                    ]
-                ]
-            ]
-        ];
+                return [
+                    'id' => $surat->id_surat,
+                    'teacher' => $surat->pengguna->nama,
+                    'nip' => $surat->pengguna->nip,
+                    'phone' => $surat->pengguna->no_telp,
+                    'full_name' => $surat->pengguna->nama,
+                    'type' => $surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
+                    'approved_date' => $surat->updated_at->format('Y-m-d'),
+                    'status' => 'approved',
+                    'keperluan' => $detail->keperluan ?? '-',
+                    'tempat' => $detail->tempat ?? '-',
+                    'tanggal_tugas' => $detail->tanggal ?? '-',
+                    'hari' => $detail->hari ?? '-',
+                    'jam' => $detail->jam ?? '-',
+                    'waktu' => $detail->jam ?? '-',
+                    'guru_list' => $this->getGuruList($surat),
+                ];
+            });
 
-        $letters_indexed = collect($approved_letters)->keyBy('id')->toArray();
-        $completed_letters_indexed = collect($completed_letters)->keyBy('id')->toArray();
-        
-        return view('dashboard-tu', compact('approved_letters', 'completed_letters', 'letters_indexed', 'completed_letters_indexed'))
-            ->with('message', session('message'));
+        // SURAT YANG SUDAH SELESAI (status: selesai)
+        $completed_letters = Surat::with(['pengguna', 'suratDispensasi', 'suratPerintahTugas'])
+            ->where('status_berkas', 'selesai')
+            ->latest()
+            ->get()
+            ->map(function ($surat) {
+                $detail = $surat->suratDispensasi ?? $surat->suratPerintahTugas;
+
+                return [
+                    'id' => $surat->id_surat,
+                    'teacher' => $surat->pengguna->nama,
+                    'nip' => $surat->pengguna->nip,
+                    'phone' => $surat->pengguna->no_telp,
+                    'full_name' => $surat->pengguna->nama,
+                    'type' => $surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
+                    'completed_date' => $surat->updated_at->format('Y-m-d H:i:s'),
+                    'status' => 'completed',
+                    'pickup_notified' => true, // Otomatis true karena sudah diberitahu saat selesai
+                    'keperluan' => $detail->keperluan ?? '-',
+                    'tempat' => $detail->tempat ?? '-',
+                    'tanggal_tugas' => $detail->tanggal ?? '-',
+                    'hari' => $detail->hari ?? '-',
+                    'jam' => $detail->jam ?? '-',
+                    'guru_list' => $this->getGuruList($surat),
+                ];
+            });
+
+        $letters_indexed = $approved_letters->keyBy('id')->toArray();
+        $completed_letters_indexed = $completed_letters->keyBy('id')->toArray();
+
+        return view('dashboard-tu', compact(
+            'approved_letters',
+            'completed_letters',
+            'letters_indexed',
+            'completed_letters_indexed'
+        ))->with('message', session('message'));
     }
 
+    // Helper function untuk ambil list guru
+    private function getGuruList($surat)
+    {
+        $list = [];
+
+        if ($surat->suratPerintahTugas) {
+            $details = $surat->suratPerintahTugas->detailSpt ?? [];
+            foreach ($details as $detail) {
+                $list[] = [
+                    'nama' => $detail->nama_guru,
+                    'nip' => $detail->nip,
+                    'keterangan' => $detail->keterangan ?? '-',
+                ];
+            }
+        } else {
+            // Untuk dispensasi, tampilkan guru yang mengajukan
+            $list[] = [
+                'nama' => $surat->pengguna->nama,
+                'nip' => $surat->pengguna->nip,
+                'keterangan' => 'Yang mengajukan',
+            ];
+        }
+
+        return $list;
+    }
+
+    // Proses surat (selesaikan surat)
     public function process(Request $request)
     {
         $action = $request->input('action');
         $letterId = $request->input('letter_id');
 
-        $letters = [
-            1 => ['teacher' => 'Maya Sari'],
-            2 => ['teacher' => 'Eko Prasetyo'],
-        ];
-
-        $teacher = $letters[$letterId]['teacher'] ?? 'Guru tidak diketahui';
+        $surat = Surat::with('pengguna')->findOrFail($letterId);
+        $teacher = $surat->pengguna->nama;
 
         if ($action === 'complete') {
-            // Saat selesai, otomatis diberitahu
+            // Update status jadi selesai
+            $surat->update(['status_berkas' => 'selesai']);
+
+            // Kirim notifikasi otomatis ke guru
+            NotifikasiHelper::insert(
+                $surat->id_surat,
+                $surat->id_pengguna,
+                "Surat Anda sudah selesai dan siap diambil di TU",
+                null
+            );
+
             $message = "Surat {$teacher} berhasil diselesaikan dan siap diambil. Notifikasi otomatis sudah dikirim ke guru yang bersangkutan.";
         } else {
             $message = "Aksi tidak dikenali untuk surat {$teacher}.";
@@ -150,85 +135,51 @@ class DashboardTuController extends Controller
         return redirect()->route('dashboard.tu')->with('message', $message);
     }
 
-    // Method untuk kirim ulang notifikasi
+    // Kirim ulang notifikasi
     public function resendNotification(Request $request)
     {
         $letterId = $request->input('letter_id');
-        
-        $letters = [
-            3 => ['teacher' => 'Siti Nurjanah'],
-            4 => ['teacher' => 'Rahman Hakim'],
-        ];
 
-        $teacher = $letters[$letterId]['teacher'] ?? 'Guru tidak diketahui';
+        $surat = Surat::with('pengguna')->findOrFail($letterId);
+        $teacher = $surat->pengguna->nama;
+
+        // Kirim notifikasi ulang
+        NotifikasiHelper::insert(
+            $surat->id_surat,
+            $surat->id_pengguna,
+            "Reminder: Surat Anda sudah selesai dan menunggu pengambilan di TU",
+            null
+        );
+
         $message = "Notifikasi berhasil dikirim ulang ke {$teacher}. Reminder pengambilan surat sudah terkirim.";
 
         return redirect()->route('dashboard.tu')->with('message', $message);
     }
 
+    // Get detail surat (untuk modal/preview)
     public function getLetterDetail($id)
     {
-        $letters = [
-            1 => [
-                'id' => 1,
-                'teacher' => 'Maya Sari',
-                'nip' => '197801012005012001',
-                'phone' => '081234567890',
-                'full_name' => 'Maya Sari, S.Pd',
-                'type' => 'Surat Tugas',
-                'subject' => 'Matematika',
-                'approved_date' => '2025-08-26',
-                'approved_by' => 'Kepala Sekolah',
-                'status' => 'approved',
-                'keperluan' => 'Pelatihan Kurikulum Merdeka di Jakarta',
-                'tempat' => 'Hotel Mercure Jakarta',
-                'tanggal_tugas' => '2025-09-01',
-                'hari' => 'Senin',
-                'jam' => '08:00 - 16:00',
-                'guru_list' => [
-                    [
-                        'nama' => 'Maya Sari',
-                        'nip' => '197801012005012001',
-                        'keterangan' => 'Peserta Pelatihan'
-                    ],
-                    [
-                        'nama' => 'Budi Santoso',
-                        'nip' => '198203152009011003',
-                        'keterangan' => 'Pendamping'
-                    ]
-                ]
-            ],
-            2 => [
-                'id' => 2,
-                'teacher' => 'Eko Prasetyo',
-                'nip' => '198205152008011002',
-                'phone' => '081234567891',
-                'full_name' => 'Eko Prasetyo, S.Pd, M.Pd',
-                'type' => 'Surat Perintah Tugas',
-                'subject' => 'Fisika',
-                'approved_date' => '2025-08-25',
-                'approved_by' => 'Kepala Sekolah',
-                'status' => 'approved',
-                'keperluan' => 'Mengawas Ujian Nasional CBT di SMP Negeri 2 Surabaya',
-                'tempat' => 'SMP Negeri 2 Surabaya',
-                'tanggal_tugas' => '2025-09-05',
-                'hari' => 'Kamis',
-                'jam' => '07:00 - 15:00',
-                'guru_list' => [
-                    [
-                        'nama' => 'Eko Prasetyo',
-                        'nip' => '198205152008011002',
-                        'keterangan' => 'Pengawas Utama'
-                    ],
-                    [
-                        'nama' => 'Sri Wahyuni',
-                        'nip' => '199012102015012002',
-                        'keterangan' => 'Pengawas Cadangan'
-                    ]
-                ]
-            ]
+        $surat = Surat::with(['pengguna', 'suratDispensasi.detailDispensasi', 'suratPerintahTugas.detailSpt'])
+            ->findOrFail($id);
+
+        $detail = $surat->suratDispensasi ?? $surat->suratPerintahTugas;
+
+        $data = [
+            'id' => $surat->id_surat,
+            'teacher' => $surat->pengguna->nama,
+            'nip' => $surat->pengguna->nip,
+            'phone' => $surat->pengguna->no_telp,
+            'full_name' => $surat->pengguna->nama,
+            'type' => $surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
+            'status' => $surat->status_berkas,
+            'keperluan' => $detail->keperluan ?? '-',
+            'tempat' => $detail->tempat ?? '-',
+            'tanggal_tugas' => $detail->tanggal ?? '-',
+            'hari' => $detail->hari ?? '-',
+            'jam' => $detail->jam ?? '-',
+            'guru_list' => $this->getGuruList($surat),
         ];
 
-        return response()->json($letters[$id] ?? null);
+        return response()->json($data);
     }
 }

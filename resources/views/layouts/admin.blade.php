@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,17 +9,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body class="bg-gray-50">
     <!-- Mobile menu overlay -->
     <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
-    
+
     <!-- Header -->
     <header class="bg-white shadow-sm border-b fixed w-full top-0 z-20">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo & Mobile menu button -->
                 <div class="flex items-center">
-                    <button id="mobile-menu-button" class="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="mobile-menu-button"
+                        class="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center ml-2 lg:ml-0">
@@ -48,7 +51,8 @@
 
     <div class="flex pt-16 h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out pt-16 lg:pt-0">
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out pt-16 lg:pt-0">
             <div class="flex flex-col h-full overflow-hidden">
                 <!-- User info mobile -->
                 <div class="lg:hidden p-4 border-b bg-gray-50">
@@ -65,22 +69,26 @@
 
                 <!-- Navigation -->
                 <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-                    <a href="{{ route('dashboard.admin') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('dashboard.admin') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
+                    <a href="{{ route('dashboard.admin') }}"
+                        class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('dashboard.admin') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
                         <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
                         <span class="font-medium">Dashboard</span>
                     </a>
-                    
-                    <a href="{{ route('admin.kelola-guru') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('admin.kelola-guru') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
+
+                    <a href="{{ route('admin.kelola-guru') }}"
+                        class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('admin.kelola-guru') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
                         <i class="fas fa-users mr-3 text-lg"></i>
                         <span class="font-medium">Kelola Data Guru</span>
                     </a>
-                    
-                    <a href="{{ route('admin.kelola-surat') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('admin.kelola-surat') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
+
+                    <a href="{{ route('admin.kelola-surat') }}"
+                        class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('admin.kelola-surat') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
                         <i class="fas fa-file-alt mr-3 text-lg"></i>
                         <span class="font-medium">Kelola Surat</span>
                     </a>
-                    
-                    <a href="{{ route('admin.history-surat') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('admin.history-surat') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
+
+                    <a href="{{ route('admin.history-surat') }}"
+                        class="sidebar-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 {{ request()->routeIs('admin.history-surat') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' : '' }}">
                         <i class="fas fa-history mr-3 text-lg"></i>
                         <span class="font-medium">History Surat</span>
                     </a>
@@ -90,10 +98,13 @@
                 <div class="p-4 border-t flex-shrink-0">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit">Logout</button>
+                        <button type="submit"
+                            class="flex items-center w-full px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors duration-200">
+                            <i class="fas fa-sign-out-alt mr-3 text-lg"></i>
+                            <span class="font-medium">Logout</span>
+                        </button>
                     </form>
                 </div>
-            </div>
         </aside>
 
         <!-- Main Content -->
@@ -137,4 +148,5 @@
         });
     </script>
 </body>
+
 </html>
