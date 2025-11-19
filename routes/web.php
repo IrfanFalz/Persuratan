@@ -11,6 +11,7 @@ use App\Http\Controllers\FormSuratController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PersetujuanController;
 use App\Http\Controllers\TUController;
+use App\Http\Controllers\TemplateSuratController;
 
 Route::get('/', [AuthController::class, 'redirectRoot']);
 
@@ -31,7 +32,7 @@ Route::middleware(['auth','checkRole:GURU'])->group(function () {
     Route::get('/guru-data', [FormSuratController::class, 'getGuruData'])->name('guru.data');
     Route::get('/siswa-data', [FormSuratController::class, 'getSiswaData'])->name('siswa.data');
 
-    Route::post('/surat', [SuratController::class, 'store'])->name('surat.store');
+    Route::post('/surat/store', [SuratController::class, 'store'])->name('surat.store');
     Route::get('/surat/my', [SuratController::class, 'mySurat'])->name('surat.my');
 });
 
@@ -61,11 +62,13 @@ Route::middleware(['auth','checkRole:ADMIN'])->group(function () {
     Route::post('/admin/users/{id}', [DashboardAdminController::class, 'usersUpdate'])->name('admin.users.update');
     Route::delete('/admin/users/{id}', [DashboardAdminController::class, 'usersDelete'])->name('admin.users.delete');
 
-    Route::get('/admin/templates', [DashboardAdminController::class, 'templatesIndex'])->name('admin.templates.index');
-    Route::post('/admin/templates', [DashboardAdminController::class, 'templatesStore'])->name('admin.templates.store');
-    Route::post('/admin/templates/{id}', [DashboardAdminController::class, 'templatesUpdate'])->name('admin.templates.update');
-    Route::delete('/admin/templates/{id}', [DashboardAdminController::class, 'templatesDelete'])->name('admin.templates.delete');
-    Route::get('/admin/template/{id}', [DashboardAdminController::class, 'viewTemplate'])->name('admin.view-template');
+    Route::get('/admin/templates', [TemplateSuratController::class, 'index'])->name('templates.index');
+    Route::post('/admin/templates', [TemplateSuratController::class, 'store'])->name('templates.store');
+    Route::get('/admin/templates/{id}/edit', [TemplateSuratController::class, 'edit'])->name('templates.edit');
+    Route::post('/admin/templates/{id}', [TemplateSuratController::class, 'update'])->name('templates.update');
+    Route::delete('/admin/templates/{id}', [TemplateSuratController::class, 'destroy'])->name('templates.destroy');
+
+    Route::get('/admin/templates/{id}', [TemplateSuratController::class, 'show'])->name('templates.show');
 
     Route::get('/admin/kelola-guru', [DashboardAdminController::class, 'kelolaGuru'])->name('admin.kelola-guru');
     Route::delete('/admin/users/{id}', [DashboardAdminController::class, 'usersDelete'])->name('admin.users.delete');

@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kategori extends Model
 {
-    //
     protected $table = 'kategori';
     protected $primaryKey = 'id_kategori';
     public $timestamps = false;
 
+    protected $fillable = ['id_surat'];
+
     public function surat()
     {
-        return $this->belongsTo(Surat::class, 'id_surat');
+        return $this->belongsTo(Surat::class, 'id_surat', 'id_surat');
     }
 }

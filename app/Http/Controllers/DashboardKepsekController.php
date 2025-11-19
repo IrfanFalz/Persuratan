@@ -101,16 +101,27 @@ class DashboardKepsekController extends Controller
         $teacher = $persetujuan->surat->pengguna->nama ?? 'Guru tidak diketahui';
 
         if ($request->action === 'approve') {
-            $persetujuan->disetujui = 'ya';
-            $message = "Surat dari {$teacher} berhasil disetujui dan diteruskan ke TU.";
-            $status = 'success';
-            $notifStatus = 'disetujui';
-        } else {
-            $persetujuan->disetujui = 'tidak';
-            $message = "Surat dari {$teacher} ditolak. Notifikasi dikirim ke guru terkait.";
-            $status = 'error';
-            $notifStatus = 'ditolak';
-        }
+        $persetujuan->disetujui = 'ya';
+
+        $surat = $persetujuan->surat;
+        $surat->status_berkas = 'approved';
+        $surat->save();
+
+        $message = "Surat dari {$teacher} berhasil disetujui dan diteruskan ke TU.";
+        $status = 'success';
+        $notifStatus = 'disetujui';
+
+    } else {
+        $persetujuan->disetujui = 'tidak';
+
+        $surat = $persetujuan->surat;
+        $surat->status_berkas = 'declined';
+        $surat->save();
+
+        $message = "Surat dari {$teacher} ditolak. Notifikasi dikirim ke guru terkait.";
+        $status = 'error';
+        $notifStatus = 'ditolak';
+    }
 
         $persetujuan->save();
 

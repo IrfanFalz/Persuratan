@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +16,8 @@ class SuratPerintahTugas extends Model
         'tempat',
         'tanggal',
         'jam',
-        'hari'
+        'hari',
+        'lampiran'
     ];
 
     public function surat()

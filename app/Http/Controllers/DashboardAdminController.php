@@ -135,20 +135,21 @@ class DashboardAdminController extends Controller
     }
 
     public function historySurat()
-    {
-        $historySuratPaginated = \App\Models\Surat::with(['pengguna', 'template'])
-            ->orderBy('dibuat_pada', 'desc')
-            ->paginate(10);
+{
+    $historySuratPaginated = \App\Models\Surat::with(['pengguna', 'template'])
+        ->orderBy('dibuat_pada', 'desc')
+        ->paginate(10);
 
-        $pagination = [
-            'current_page' => $historySuratPaginated->currentPage(),
-            'last_page'    => $historySuratPaginated->lastPage(),
-            'per_page'     => $historySuratPaginated->perPage(),
-            'total'        => $historySuratPaginated->total(),
-        ];
+    $pagination = [
+        'current_page' => $historySuratPaginated->currentPage(),
+        'last_page' => $historySuratPaginated->lastPage(),
+        'per_page' => $historySuratPaginated->perPage(),
+        'total' => $historySuratPaginated->total(),
+    ];
 
-        return view('admin.history-surat', compact('historySuratPaginated', 'pagination'));
-    }
+    return view('admin.history-surat', compact('historySuratPaginated', 'pagination'));
+}
+
 
     public function kelolaGuru()
     {

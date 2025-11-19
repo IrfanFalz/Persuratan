@@ -143,253 +143,199 @@
             <!-- Form - Mobile Optimized -->
             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
                 <form method="POST" action="{{ route('surat.store') }}" class="space-y-6" enctype="multipart/form-data">
-                @csrf
+                    @csrf
                     <input type="hidden" name="jenis" value="{{ $letter_type === 'surat-perintah-tugas' ? 'spt' : ($letter_type === 'surat-dispensasi' ? 'dispensasi' : '') }}">
+
                     <!-- Data Pemohon -->
                     <div class="border-b border-gray-200 pb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <i class="fas fa-user text-blue-600 mr-3 flex-shrink-0"></i>
                             <span>Data Pemohon</span>
                         </h3>
+
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                                 <div class="relative">
-                                    <input type="text" id="nama-input" name="nama" placeholder="Ketik nama guru..." required
+                                    <input type="text" id="nama-input" placeholder="Ketik nama guru..." required
                                         class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                                         autocomplete="off">
                                     <button type="button" id="search-guru-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800">
                                         <i class="fas fa-search"></i>
                                     </button>
-                                    <!-- Dropdown Autocomplete -->
-                                    <div id="autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
-                                    </div>
+                                    <div id="autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
                                 </div>
                             </div>
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">NIP</label>
                                 <div class="relative">
-                                    <input type="text" id="nip-input" name="nip" placeholder="NIP akan terisi otomatis" required 
+                                    <input type="text" id="nip-input" placeholder="NIP akan terisi otomatis" required 
                                         class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                     <button type="button" id="search-guru-btn-2" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">No. Telepon</label>
                                 <div class="relative">
-                                    <input type="tel" id="phone-input" name="phone" placeholder="Ketik nomor telepon..." required 
-                                        class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" autocomplete="off">
+                                    <input type="tel" id="phone-input" placeholder="Ketik nomor telepon..." required 
+                                        class="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     <button type="button" id="search-guru-btn-3" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800">
                                         <i class="fas fa-search"></i>
                                     </button>
-                                    <!-- Dropdown Autocomplete untuk Phone -->
-                                    <div id="phone-autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
-                                    </div>
+                                    <div id="phone-autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
-                    <!-- Form berdasarkan jenis surat -->
+                    <!-- FORM SURAT PERINTAH TUGAS -->
                     @if($letter_type === 'surat-perintah-tugas')
                         <div class="border-b border-gray-200 pb-6">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-briefcase text-green-600 mr-3 flex-shrink-0"></i>
                                 <span>Detail Surat Perintah Tugas</span>
                             </h3>
+
                             <div class="space-y-4 sm:space-y-6">
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700">Keperluan</label>
                                     <textarea name="keperluan" rows="3" placeholder="Jelaskan keperluan..." required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"></textarea>
                                 </div>
+
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Hari</label>
                                         <input type="text" name="hari" placeholder="Masukkan hari" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
+
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Tanggal</label>
                                         <input type="date" name="tanggal" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
+
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Jam</label>
                                         <input type="text" name="jam" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
+
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Tempat</label>
                                         <input type="text" name="tempat" placeholder="Masukkan tempat" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
                                 </div>
+
                                 <div class="space-y-4">
                                     <h4 class="text-sm font-medium text-gray-700">Data Guru (Nama, NIP, Keterangan)</h4>
+
                                     <div id="guru-container" class="space-y-4">
                                         <div class="guru-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
                                             <div class="space-y-1 relative">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Nama Guru</label>
-                                                <input type="text" name="nama[]" placeholder="Ketik nama guru..." required autocomplete="off"
+                                                <input type="text" name="nama_guru[]" placeholder="Ketik nama guru..." required autocomplete="off"
                                                     class="guru-nama-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                                 <div class="guru-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
                                             </div>
+
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
-                                                <input type="text" name="nip[]" placeholder="NIP akan terisi otomatis" required 
+                                                <input type="text" name="nip_guru[]" placeholder="NIP akan terisi otomatis" required 
                                                     class="guru-nip-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
                                             </div>
+
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Keterangan</label>
-                                                <input type="text" name="keterangan[]" placeholder="Keterangan (peran)" required
+                                                <input type="text" name="keterangan_guru[]" placeholder="Keterangan (peran)" required
                                                     class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                             </div>
                                         </div>
                                     </div>
+
                                     <button type="button" id="add-guru" class="w-full sm:w-auto px-4 py-2 text-blue-600 hover:text-blue-900 border border-blue-300 rounded-lg hover:bg-blue-50 flex items-center justify-center sm:justify-start">
                                         <i class="fas fa-plus mr-2"></i> Tambah Guru
                                     </button>
                                 </div>
                             </div>
                         </div>
+                    @endif
 
-                    @elseif($letter_type === 'surat-dispensasi')
+
+                    <!-- FORM SURAT DISPENSASI -->
+                    @if($letter_type === 'surat-dispensasi')
                         <div class="border-b border-gray-200 pb-6">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-calendar-times text-orange-600 mr-3 flex-shrink-0"></i>
                                 <span>Detail Surat Dispensasi</span>
                             </h3>
+
                             <div class="space-y-4 sm:space-y-6">
+
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700">Keperluan</label>
                                     <textarea name="keperluan" rows="3" placeholder="Jelaskan keperluan..." required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"></textarea>
                                 </div>
+
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Hari</label>
                                         <input type="text" name="hari" placeholder="Masukkan hari" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
+
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Tanggal</label>
                                         <input type="date" name="tanggal" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
+
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Jam</label>
                                         <input type="text" name="jam" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
+
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-gray-700">Tempat</label>
                                         <input type="text" name="tempat" placeholder="Masukkan tempat" required
                                             class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                     </div>
                                 </div>
+
                                 <div class="space-y-4">
                                     <h4 class="text-sm font-medium text-gray-700">Data Siswa (Nama, NISN, Kelas)</h4>
+
                                     <div id="siswa-dispensasi-container" class="space-y-4">
                                         <div class="siswa-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                                                <input type="text" name="nama[]" placeholder="Masukkan nama siswa..." required 
+                                                <input type="text" name="nama_siswa[]" placeholder="Masukkan nama siswa..." required 
                                                     class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                             </div>
+
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">NISN</label>
                                                 <input type="text" name="nisn[]" placeholder="Masukkan NISN..." required 
                                                     class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                             </div>
-                                            <div class="space-y-1">
-                                                <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                                                <input type="text" name="kelas[]" placeholder="Masukkan kelas..." required 
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button type="button" id="add-siswa-dispensasi" class="w-full sm:w-auto px-4 py-2 text-blue-600 hover:text-blue-900 border border-blue-300 rounded-lg hover:bg-blue-50 flex items-center justify-center sm:justify-start">
-                                        <i class="fas fa-plus mr-2"></i> Tambah Siswa
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
 
-                    @elseif($letter_type === 'surat-panggilan-ortu')
-                        <div class="border-b border-gray-200 pb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                <i class="fas fa-phone text-purple-600 mr-3 flex-shrink-0"></i>
-                                <span>Detail Surat Panggilan Orang Tua</span>
-                            </h3>
-                            <div class="space-y-4 sm:space-y-6">
-                                <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700">Keperluan</label>
-                                    <textarea name="keperluan" rows="3" placeholder="Jelaskan keperluan..." required
-                                            class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"></textarea>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-gray-700">Hari</label>
-                                        <input type="text" name="hari" placeholder="Masukkan hari" required
-                                            class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                                        <input type="date" name="tanggal" required
-                                            class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-gray-700">Jam</label>
-                                        <input type="text" name="jam" required
-                                            class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-gray-700">Tempat</label>
-                                        <input type="text" name="tempat" placeholder="Masukkan tempat" required
-                                            class="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                    </div>
-                                </div>
-                                <div class="space-y-4">
-                                    <h4 class="text-sm font-medium text-gray-700">Guru yang Ditemui</h4>
-                                    <div id="guru-ditemui-container" class="space-y-4">
-                                        <div class="guru-ditemui-row p-4 bg-gray-50 rounded-lg relative">
-                                        <input type="text" name="guru_ditemui[]" placeholder="Ketik nama guru..." required autocomplete="off"
-                                            class="guru-ditemui-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                        <div class="guru-ditemui-dropdown hidden absolute top-full left-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
-                                    </div>
-                                    </div>
-                                    <button type="button" id="add-guru-ditemui" class="w-full sm:w-auto px-4 py-2 text-blue-600 hover:text-blue-900 border border-blue-300 rounded-lg hover:bg-blue-50 flex items-center justify-center sm:justify-start">
-                                        <i class="fas fa-plus mr-2"></i> Tambah Guru
-                                    </button>
-                                </div>
-                                <div class="space-y-4">
-                                    <h4 class="text-sm font-medium text-gray-700">Data Siswa dan Orang Tua (Nama Siswa, Kelas, Nama Orang Tua)</h4>
-                                    <div id="siswa-ortu-container" class="space-y-4">
-                                        <div class="siswa-ortu-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
-                                            <div class="space-y-1 relative">
-                                                <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                                                <input type="text" name="nama_siswa[]" placeholder="Ketik nama siswa..." required autocomplete="off"
-                                                    class="ortu-siswa-nama-input w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                                <div class="ortu-siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
-                                            </div>
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                                                <input type="text" name="kelas[]" placeholder="Kelas akan terisi otomatis" required readonly
-                                                    class="ortu-siswa-kelas-input w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base">
-                                            </div>
-                                            <div class="space-y-1">
-                                                <label class="block text-xs text-gray-600 sm:hidden">Nama Orang Tua</label>
-                                                <input type="text" name="nama_ortu[]" placeholder="Nama Orang Tua" required
+                                                <input type="text" name="kelas_siswa[]" placeholder="Masukkan kelas..." required 
                                                     class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                                             </div>
                                         </div>
                                     </div>
-                                    <button type="button" id="add-siswa-ortu" class="w-full sm:w-auto px-4 py-2 text-blue-600 hover:text-blue-900 border border-blue-300 rounded-lg hover:bg-blue-50 flex items-center justify-center sm:justify-start">
+
+                                    <button type="button" id="add-siswa-dispensasi" class="w-full sm:w-auto px-4 py-2 text-blue-600 hover:text-blue-900 border border-blue-300 rounded-lg hover:bg-blue-50 flex items-center justify-center sm:justify-start">
                                         <i class="fas fa-plus mr-2"></i> Tambah Siswa
                                     </button>
                                 </div>
@@ -403,9 +349,11 @@
                             <i class="fas fa-paperclip text-indigo-600 mr-3 flex-shrink-0"></i>
                             <span>Lampiran Pendukung</span>
                         </h3>
+
                         <div class="space-y-4">
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Upload Dokumen (Opsional)@if ($letter_type === 'surat-perintah-tugas') - Termasuk Bukti Undangan @endif</label>
+                                <label class="block text-sm font-medium text-gray-700">Upload Dokumen (Opsional)@if($letter_type === 'surat-perintah-tugas') - Termasuk Bukti Undangan @endif</label>
+
                                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 transition duration-200">
                                     <i class="fas fa-cloud-upload-alt text-2xl sm:text-4xl text-gray-400 mb-2 sm:mb-4"></i>
                                     <input type="file" name="lampiran" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="hidden" id="file-upload">
@@ -416,6 +364,7 @@
                                     <p class="text-xs sm:text-sm text-gray-500 mt-2">PDF, JPG, PNG, DOC, DOCX (Max: 5MB)</p>
                                 </div>
                             </div>
+
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">Keterangan Tambahan</label>
                                 <textarea name="keterangan" rows="3" placeholder="Keterangan tambahan (opsional)..."
@@ -424,23 +373,13 @@
                         </div>
                     </div>
 
-                    <!-- Persetujuan -->
-                    <!-- <div class="bg-gray-50 p-4 sm:p-6 rounded-lg">
-                        <div class="flex items-start space-x-3">
-                            <input type="checkbox" id="agreement" name="agreement" required 
-                                class="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0">
-                            <label for="agreement" class="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                                <span class="font-medium">Pernyataan:</span> Saya menyatakan bahwa data yang saya isi adalah benar dan dapat dipertanggungjawabkan. Saya bersedia menerima sanksi apabila dikemudian hari terbukti data yang saya sampaikan tidak benar.
-                            </label>
-                        </div>
-                    </div> -->
-
                     <!-- Submit Button -->
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0 pt-6">
                         <a href="{{ route('dashboard.guru') }}"
                         class="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200 flex items-center justify-center">
                             <i class="fas fa-arrow-left mr-2"></i>Kembali
                         </a>
+
                         <button type="submit" 
                                 class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-200 font-semibold shadow-lg flex items-center justify-center">
                             <i class="fas fa-paper-plane mr-2"></i>Ajukan Surat
@@ -794,16 +733,16 @@ if (addGuruBtn) {
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">Nama Guru</label>
                 <div class="relative">
-                    <input type="text" name="nama[]" placeholder="Ketik nama guru..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                    <input type="text" name="nama_guru[]" placeholder="Ketik nama guru..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                 </div>
             </div>
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
-                <input type="text" name="nip[]" placeholder="NIP otomatis" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
+                <input type="text" name="nip_guru[]" placeholder="NIP" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
             </div>
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">Keterangan</label>
-                <input type="text" name="keterangan[]" placeholder="Keterangan (peran)" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                <input type="text" name="keterangan_guru[]" placeholder="Keterangan (peran)" required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
             </div>
             <div class="sm:col-span-3 flex justify-end">
                 <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
@@ -821,6 +760,8 @@ if (addGuruBtn) {
         removeBtn.addEventListener('click', function() {
             newRow.remove();
         });
+
+        newRow.querySelector('.guru-nip-input').removeAttribute('readonly');
     });
 }
 

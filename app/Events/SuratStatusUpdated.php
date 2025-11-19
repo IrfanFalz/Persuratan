@@ -2,15 +2,14 @@
 
 namespace App\Events;
 
+use App\Models\Surat;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use App\Models\Surat;
 
 class SuratStatusUpdated implements ShouldBroadcast
 {
-    use InteractsWithSockets, SerializesModels;
+    use SerializesModels;
 
     public $surat;
 
@@ -21,11 +20,20 @@ class SuratStatusUpdated implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('surat');
+        // Channel publik, bisa diganti ke private kalau perlu otentikasi
+        return new Channel('surat.status');
     }
 
     public function broadcastAs()
     {
         return 'SuratStatusUpdated';
+    }
+
+    public function broadcastWith()
+    {
+        return [
+            'id_surat' => $this->surat->id_surat,
+            'status_berkas' => $this->surat->status_berkas,
+        ];
     }
 }

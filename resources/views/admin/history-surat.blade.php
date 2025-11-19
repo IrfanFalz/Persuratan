@@ -159,56 +159,75 @@
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody class="divide-y divide-gray-100" id="tableBody">
-                    @foreach($historySuratPaginated as $index => $surat)
-                    <tr class="hover:bg-gray-50 transition-colors duration-200" 
-                        data-pengaju="{{ strtolower($surat->pengguna->nama_lengkap ?? '-') }}" 
-                        data-jenis="{{ $surat->template->nama_template ?? '-' }}" 
-                        data-status="{{ $surat->status }}"
-                        data-tanggal="{{ $surat->dibuat_pada }}">
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ ($pagination['current_page'] - 1) * $pagination['per_page'] + $index + 1 }}</td>
-                        <td class="px-6 py-4">
-                            <div class="font-semibold text-gray-900">{{ $surat->pengguna->nama_lengkap ?? '-' }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
-                                {{ $surat['jenis'] == 'Surat Dispensasi' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                {{ $surat->template->nama_template ?? '-' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
-                                @if($surat['status'] == 'Selesai') bg-green-100 text-green-800
-                                @elseif($surat['status'] == 'Diproses') bg-yellow-100 text-yellow-800
-                                @else bg-orange-100 text-orange-800 @endif">
-                                {{ $surat['status'] }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ \Carbon\Carbon::parse($surat->dibuat_pada)->format('d/m/Y') }}
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <button onclick="viewDetail({{ json_encode($surat) }})" 
+                    @foreach ($historySuratPaginated as $index => $surat)
+                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                            {{-- Nomor urut --}}
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                {{ ($pagination['current_page'] - 1) * $pagination['per_page'] + $index + 1 }}
+                            </td>
+
+                            {{-- Guru Pengaju --}}
+                            <td class="px-6 py-4">
+                                <div class="font-semibold text-gray-900">
+                                    {{ $surat->pengguna->nama ?? '-' }}
+                                </div>
+                            </td>
+
+                            {{-- Jenis Surat --}}
+                            <td class="px-6 py-4">
+                                <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                    {{ $surat->template->nama ?? '-' }}
+                                </span>
+                            </td>
+
+                            {{-- Status Surat --}}
+                            <td class="px-6 py-4">
+                                <span id="status-{{ $surat->id_surat }}"
+                                    class="inline-flex px-3 py-1 text-xs font-medium rounded-full
+                                    @if($surat->status_berkas == 'selesai') bg-green-100 text-green-800
+                                    @elseif($surat->status_berkas == 'approve') bg-yellow-100 text-yellow-800
+                                    @elseif($surat->status_berkas == 'decline') bg-red-100 text-red-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                    {{ ucfirst($surat->status_berkas) }}
+                                </span>
+                            </td>
+
+                            {{-- Tanggal dibuat --}}
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                {{ \Carbon\Carbon::parse($surat->dibuat_pada)->format('d/m/Y') }}
+                            </td>
+
+                            {{-- Aksi --}}
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    {{-- Tombol Detail --}}
+                                    <button onclick="viewDetail({{ json_encode($surat) }})"
                                         class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                         title="Lihat Detail">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </button>
-                                @if($surat['status'] == 'Selesai')
-                                <button onclick="downloadSurat({{ $surat['id'] }})" 
-                                        class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all duration-300"
-                                        title="Download Surat">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                </button>
-                                @endif
-                            </div>
-                        </td>
-                    </>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+
+                                    {{-- Tombol Download hanya jika status Selesai --}}
+                                    @if ($surat->status == 'Selesai')
+                                        <button onclick="downloadSurat({{ $surat->id }})"
+                                            class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all duration-300"
+                                            title="Download Surat">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
@@ -443,4 +462,37 @@ document.getElementById('detailModal').addEventListener('click', function(e) {
     }
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/pusher-js@8.2.0/dist/web/pusher.min.js"></script>
+<script type="module">
+import Echo from "laravel-echo";
+
+window.Pusher = Pusher;
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: '{{ config('reverb.app_key') }}',
+    wsHost: '{{ config('reverb.host') }}',
+    wsPort: '{{ config('reverb.port', 8080) }}',
+    wssPort: '{{ config('reverb.port', 8080) }}',
+    forceTLS: false,
+    enabledTransports: ['ws', 'wss'],
+});
+
+// 🔥 Dengarkan event dari channel "surat.status"
+window.Echo.channel('surat.status')
+    .listen('.SuratStatusUpdated', (data) => {
+        const statusEl = document.getElementById(`status-${data.id_surat}`);
+        if (statusEl) {
+            statusEl.textContent = data.status_berkas.charAt(0).toUpperCase() + data.status_berkas.slice(1);
+
+            // Update warna badge sesuai status baru
+            statusEl.className = 'inline-flex px-3 py-1 text-xs font-medium rounded-full ' +
+                (data.status_berkas === 'approve' ? 'bg-yellow-100 text-yellow-800' :
+                 data.status_berkas === 'selesai' ? 'bg-green-100 text-green-800' :
+                 data.status_berkas === 'decline' ? 'bg-red-100 text-red-800' :
+                 'bg-gray-100 text-gray-800');
+        }
+    });
+</script>
+
 @endsection

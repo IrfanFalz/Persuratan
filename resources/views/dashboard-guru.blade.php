@@ -9,6 +9,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    @vite(['resources/js/app.js'])
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Guru - Sistem Persuratan</title>
@@ -113,10 +114,10 @@
             white-space: nowrap;
         }
         .progress-dot {
-            width: 0.75rem;
-            height: 0.75rem;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            flex-shrink: 0;
+            transition: background-color .3s ease;
         }
         @media (max-width: 639px) {
             .progress-dot {
@@ -125,9 +126,10 @@
             }
         }
         .progress-line {
-            width: 1rem;
-            height: 0.125rem;
-            flex-shrink: 0;
+            width: 30px;
+            height: 3px;
+            border-radius: 5px;
+            transition: background-color .3s ease;
         }
         @media (min-width: 640px) {
             .progress-line {
@@ -324,7 +326,7 @@
                 @php
                     $approvedCount = collect($letter_requests)->where('status', 'approved')->count();
                     $pendingCount  = collect($letter_requests)->where('status', 'pending')->count();
-                    $rejectedCount = collect($letter_requests)->where('status', 'rejected')->count();
+                    $rejectedCount = collect($letter_requests)->where('status', 'declined')->count();
                     $totalCount    = collect($letter_requests)->count();
                 @endphp
 
@@ -372,21 +374,21 @@
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center">
                                     <i class="fas fa-file-alt text-blue-500 mr-2"></i>
-                                    <h4 class="font-medium text-gray-900 text-sm">{{ $request['type'] }}</h4>
+                                    <h4 class="font-medium text-gray-900 text-sm">{{ $request->type }}</h4>
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    {{ date('d/m/Y', strtotime($request['date'])) }}
+                                    {{ date('d/m/Y', strtotime($request->date)) }}
                                 </p>
                             </div>
-                            @if($request['status'] === 'approved')
+                            @if($request->status === 'approved')
                                 <span class="status-approved">
                                     <i class="fas fa-check mr-1"></i>Disetujui
                                 </span>
-                            @elseif($request['status'] === 'processing')
+                            @elseif($request->status === 'processing')
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     <i class="fas fa-spinner mr-1 animate-spin"></i>Diproses
                                 </span>
-                            @elseif($request['status'] === 'pending')
+                            @elseif($request->status === 'pending')
                                 <span class="status-pending">
                                     <i class="fas fa-clock mr-1"></i>Menunggu
                                 </span>
@@ -399,10 +401,9 @@
                         
                         <div class="flex items-center justify-between">
                             @php
-                                // Step logic
-                                $step1 = true; // selalu true (sudah diajukan)
-                                $step2 = in_array($request['status'], ['processing', 'approved', 'rejected']);
-                                $step3 = $request['status'] === 'approved';
+                                $step1 = true; 
+                                $step2 = in_array($request->status, ['approved', 'declined', 'done']);
+                                $step3 = $request->status === 'done';
                             @endphp
 
                             <div class="flex items-center space-x-1">
@@ -419,10 +420,10 @@
                             </div>
 
                             <div class="action-buttons">
-                                <button class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200" onclick="viewLetter({{ $request['id'] }})">
+                                <button class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200" onclick="viewLetter({{ $request->id }})">
                                     <i class="fas fa-eye mr-1"></i>Lihat
                                 </button>
-                                @if($request['status'] === 'approved')
+                                @if($request->status === 'approved')
                                     <button class="action-btn bg-green-100 text-green-600 hover:bg-green-200">
                                         <i class="fas fa-download mr-1"></i>Cetak
                                     </button>
@@ -451,25 +452,30 @@
                                 <td>
                                     <div class="flex items-center">
                                         <i class="fas fa-file-alt text-blue-500 mr-3"></i>
-                                        <span class="font-medium text-gray-900">{{ $request['type'] }}</span>
+                                        <span class="font-medium text-gray-900">{{ $request->type }}</span>
                                     </div>
                                 </td>
                                 <td class="text-sm text-gray-500">
-                                    {{ date('d/m/Y', strtotime($request['date'])) }}
+                                    {{ date('d/m/Y', strtotime($request->date)) }}
                                 </td>
                                 <td class="status-cell">
-                                    @if($request['status'] === 'approved')
+                                    @php $status = $request->status; @endphp
+
+                                    @if($status === 'approved')
                                         <span class="status-approved">
                                             <i class="fas fa-check mr-1"></i>Disetujui
                                         </span>
-                                    @elseif($request['status'] === 'processing')
+
+                                    @elseif($status === 'processing')
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             <i class="fas fa-spinner mr-1 animate-spin"></i>Diproses
                                         </span>
-                                    @elseif($request['status'] === 'pending')
+
+                                    @elseif($status === 'pending')
                                         <span class="status-pending">
                                             <i class="fas fa-clock mr-1"></i>Menunggu
                                         </span>
+
                                     @else
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             <i class="fas fa-times mr-1"></i>Ditolak
@@ -478,29 +484,32 @@
                                 </td>
                                 <td>
                                     @php
-                                    
-                                        $step1 = true; // selalu true (sudah diajukan)
-                                        $step2 = in_array($request['status'], ['processing', 'approved', 'rejected']);
-                                        $step3 = $request['status'] === 'approved';
+                                        $status = $request->status;
+
+                                        $step1 = true; 
+                                        $step2 = in_array($status, ['processing', 'approved', 'rejected']);
+                                        $step3 = $status === 'approved';
                                     @endphp
 
                                     <div class="flex items-center space-x-1">
-                                        
+                                        {{-- STEP 1 --}}
                                         <div class="progress-dot {{ $step1 ? 'bg-green-500' : 'bg-gray-300' }}"></div>
                                         <div class="progress-line {{ $step2 ? 'bg-green-300' : 'bg-gray-300' }}"></div>
 
+                                        {{-- STEP 2 --}}
                                         <div class="progress-dot {{ $step2 ? 'bg-green-500' : 'bg-gray-300' }}"></div>
                                         <div class="progress-line {{ $step3 ? 'bg-green-300' : 'bg-gray-300' }}"></div>
 
+                                        {{-- STEP 3 --}}
                                         <div class="progress-dot {{ $step3 ? 'bg-green-500' : 'bg-gray-300' }}"></div>
                                     </div>
                                 </td>
 
                                 <td class="text-sm font-medium">
-                                    <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewLetter({{ $request['id'] }})">
+                                    <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewLetter({{ $request->id }})">
                                         <i class="fas fa-eye mr-1"></i>Lihat
                                     </button>
-                                    @if($request['processed_by_tu'])
+                                    @if($request->processed_by_tu)
                                         <button class="text-green-600 hover:text-green-900">
                                             <i class="fas fa-download mr-1"></i>Cetak
                                         </button>
@@ -625,9 +634,10 @@
 
                 <!-- Data Guru -->
                 <div class="space-y-4">
-                    <h4 class="font-semibold text-gray-800 flex items-center">
-                        <i class="fas fa-users text-purple-600 mr-2"></i>Data Guru
-                    </h4>
+                    <h4 id="modalDataLabel" class="font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-users text-purple-600 mr-2"></i>
+                    <span id="modalDataLabelText">Data Guru</span>
+                </h4>
                     <div id="modalGuruData" class="space-y-3">
                         <!-- Data guru akan ditampilkan di sini -->
                     </div>
