@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pengguna;
 use App\Models\Surat;
 use App\Models\TemplateSurat;
+use App\Models\Guru;
 use Illuminate\Support\Facades\Hash;
 
 class DashboardAdminController extends Controller
@@ -77,7 +78,7 @@ class DashboardAdminController extends Controller
             'no_telp' => 'nullable|string|max:20',
         ]);
 
-        Pengguna::create([
+        $user = Pengguna::create([
             'username' => $req->nip,
             'no_telp'  => $req->no_telp,
             'nip'      => $req->nip,
@@ -85,6 +86,18 @@ class DashboardAdminController extends Controller
             'password' => Hash::make($req->password),
             'role'     => $req->role,
         ]);
+
+        // If role is GURU, ensure a guru record exists for recommendations and link to pengguna
+        if (strtoupper($req->role) === 'GURU') {
+            try {
+                Guru::updateOrCreate(
+                    ['nip' => $req->nip],
+                    ['nama' => $req->nama, 'no_telp' => $req->no_telp, 'id_pengguna' => $user->id_pengguna ?? null]
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Failed to create/update guru record: '.$e->getMessage());
+            }
+        }
 
         return redirect()->route('admin.kelola-guru')
             ->with('success_message', 'Data guru berhasil ditambahkan!');
@@ -103,12 +116,34 @@ class DashboardAdminController extends Controller
 
         $user->update($data);
 
+        // Sync to guru table if role is GURU
+        if (strtoupper($data['role'] ?? $user->role) === 'GURU') {
+            try {
+                Guru::updateOrCreate(
+                    ['nip' => $data['nip']],
+                    ['nama' => $data['nama'], 'no_telp' => $data['no_telp'], 'id_pengguna' => $user->id_pengguna]
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Failed to sync guru record on user update: '.$e->getMessage());
+            }
+        }
+
         return back()->with('success_message','User berhasil diupdate');
     }
 
     public function usersDelete($id)
     {
-        Pengguna::destroy($id);
+        $user = Pengguna::find($id);
+        if ($user) {
+            // If associated guru record exists, nullify id_pengguna or remove it
+            try {
+                \App\Models\Guru::where('id_pengguna', $user->id_pengguna)->update(['id_pengguna' => null]);
+            } catch (\Exception $e) {
+                \Log::warning('Failed to unlink guru record on user delete: '.$e->getMessage());
+            }
+
+            Pengguna::destroy($id);
+        }
         return back()->with('success_message','User berhasil dihapus');
     }
 
@@ -199,7 +234,18 @@ class DashboardAdminController extends Controller
             ->orderBy('id_surat', 'DESC')
             ->get();
 
-        return view('admin.history-surat', compact('historySuratPaginated', 'pagination', 'daftarSurat'));
+        // Compute global counts for status cards, tolerating different status label variants
+        $pendingVariants = ['pending', 'diajukan'];
+        $approvedVariants = ['approve', 'approved', 'disetujui'];
+
+        $countPending = Surat::whereIn('status_berkas', $pendingVariants)->count();
+        $countApproved = Surat::whereIn('status_berkas', $approvedVariants)->count();
+        $countSelesai = Surat::where('status_berkas', 'selesai')->count();
+
+        return view('admin.history-surat', compact(
+            'historySuratPaginated', 'pagination', 'daftarSurat',
+            'countPending', 'countApproved', 'countSelesai'
+        ));
     }
 
     public function kelolaGuru()

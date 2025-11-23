@@ -11,6 +11,10 @@ use App\Models\DetailDispensasi;
 use App\Models\DetaiSpt;
 use App\Models\Pengguna;
 use App\Helpers\NotifikasiHelper;
+use Illuminate\Support\Facades\Config;
+use App\Models\Provinsi;
+use App\Models\DinasSurat;
+use App\Models\Sekolah;
 
 class FormSuratController extends Controller
 {
@@ -30,6 +34,12 @@ class FormSuratController extends Controller
         ]);
     }
 
+    // Route uses 'submit' in routes/web.php, keep compatibility by providing submit()
+    public function submit(Request $request)
+    {
+        return $this->store($request);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -43,11 +53,48 @@ class FormSuratController extends Controller
 
         $user = Auth::user();
 
-        // Buat surat utama
-        $surat = Surat::create([
+        // Determine jenis id (infer if not provided)
+        $jenisId = null;
+        if ($request->filled('id_jenis_surat')) {
+            $jenisId = intval($request->input('id_jenis_surat'));
+        } else {
+            if ($request->type === 'dispensasi') $jenisId = 1;
+            if ($request->type === 'spt') $jenisId = 2;
+        }
+
+        // Buat surat utama, simpan jenis/region. nomor_urut tetap null until approval
+        $suratData = [
             'id_pengguna'   => $user->id_pengguna,
-            'status_berkas' => 'diajukan' // Status awal: diajukan
-        ]);
+            'status_berkas' => 'diajukan',
+        ];
+
+        if (!is_null($jenisId)) $suratData['id_jenis_surat'] = $jenisId;
+        // Fill regional IDs from request if provided, otherwise try to resolve ID by kode from config
+        if ($request->filled('id_provinsi')) {
+            $suratData['id_provinsi'] = $request->input('id_provinsi');
+        } else {
+            $kodeProv = Config::get('nomor_surat.provinsi_code');
+            $provId = Provinsi::where('kode_provinsi', $kodeProv)->value('id');
+            $suratData['id_provinsi'] = $provId ?? null;
+        }
+
+        if ($request->filled('id_dinas')) {
+            $suratData['id_dinas'] = $request->input('id_dinas');
+        } else {
+            $kodeDinas = Config::get('nomor_surat.dinas_code');
+            $dinasId = DinasSurat::where('kode_dinas', $kodeDinas)->value('id');
+            $suratData['id_dinas'] = $dinasId ?? null;
+        }
+
+        if ($request->filled('id_sekolah')) {
+            $suratData['id_sekolah'] = $request->input('id_sekolah');
+        } else {
+            $kodeSek = Config::get('nomor_surat.sekolah_code');
+            $sekolahId = Sekolah::where('kode_sekolah', $kodeSek)->value('id');
+            $suratData['id_sekolah'] = $sekolahId ?? null;
+        }
+
+        $surat = Surat::create($suratData);
 
         if ($request->type === 'dispensasi') {
             // Buat surat dispensasi
@@ -118,11 +165,17 @@ class FormSuratController extends Controller
     // API untuk ambil data guru
     public function getGuruData()
     {
-        $guru = Pengguna::where('role', 'guru')
+        // Prefer master guru table, but include pengguna with role GURU not present in guru table
+        $fromGuru = \App\Models\Guru::select('nip', 'nama', 'no_telp as phone')->get();
+        $nips = $fromGuru->pluck('nip')->filter()->unique()->toArray();
+
+        $fromPengguna = Pengguna::where('role', 'GURU')
+            ->whereNotIn('nip', $nips)
             ->select('nip', 'nama', 'no_telp as phone')
             ->get();
 
-        return response()->json($guru);
+        $combined = $fromGuru->concat($fromPengguna)->values();
+        return response()->json($combined);
     }
 
     // API untuk ambil data siswa (bisa disesuaikan kalau ada table siswa)

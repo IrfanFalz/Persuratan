@@ -423,7 +423,7 @@
                                 <button class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200" onclick="viewLetter({{ $request->id }})">
                                     <i class="fas fa-eye mr-1"></i>Lihat
                                 </button>
-                                @if($request->status === 'approved')
+                                @if($request->status === 'done')
                                     <button class="action-btn bg-green-100 text-green-600 hover:bg-green-200">
                                         <i class="fas fa-download mr-1"></i>Cetak
                                     </button>
@@ -487,8 +487,8 @@
                                         $status = $request->status;
 
                                         $step1 = true; 
-                                        $step2 = in_array($status, ['processing', 'approved', 'rejected']);
-                                        $step3 = $status === 'approved';
+                                        $step2 = in_array($status, ['approved', 'declined', 'done']);
+                                        $step3 = $status === 'done';
                                     @endphp
 
                                     <div class="flex items-center space-x-1">
@@ -509,7 +509,7 @@
                                     <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewLetter({{ $request->id }})">
                                         <i class="fas fa-eye mr-1"></i>Lihat
                                     </button>
-                                    @if($request->status === 'approved')
+                                    @if($request->status === 'done')
                                         <button class="text-green-600 hover:text-green-900">
                                             <i class="fas fa-download mr-1"></i>Cetak
                                         </button>

@@ -68,6 +68,18 @@
                 align-items: center;
             }
         }
+        
+        /* Fix button clickability */
+        .button-group form,
+        .button-group button {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto !important;
+        }
+        
+        button[type="submit"] {
+            cursor: pointer !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -123,7 +135,6 @@
         </div>
 
         <!-- Statistics Cards -->
-        <!-- Statistics Cards - Updated tanpa konsep "belum diberitahu" -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
             <div class="bg-white rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 lg:p-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -183,7 +194,7 @@
             </div>
             
             <div class="divide-y divide-gray-200">
-                @foreach($approved_letters as $letter)
+                @forelse($approved_letters as $letter)
                     <div class="p-4 sm:p-6 hover:bg-gray-50">
                         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
                             <div class="flex-1 lg:mr-6">
@@ -195,7 +206,6 @@
                                                 alt="Avatar {{ $letter['teacher'] }}" 
                                                 class="w-full h-full object-cover"
                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            <!-- Fallback jika gambar tidak ditemukan -->
                                             <div class="w-full h-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm" style="display: none;">
                                                 {{ strtoupper(substr($letter['teacher'], 0, 2)) }}
                                             </div>
@@ -225,82 +235,67 @@
                                 
                                 <!-- Letter Details -->
                                 <div class="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4">
-                                    @if($letter['type'] === 'Surat Tugas')
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Keperluan:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ $letter['keperluan'] }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Tempat:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ $letter['tempat'] }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Tanggal:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ \Carbon\Carbon::parse($letter['tanggal_tugas'])->format('d/m/Y') }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Waktu:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ $letter['waktu'] }}</p>
-                                            </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                        <div>
+                                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Keperluan:</p>
+                                            <p class="text-gray-800 text-sm sm:text-base">{{ $letter['keperluan'] }}</p>
                                         </div>
-                                    @elseif($letter['type'] === 'Surat Perintah Tugas')
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Keperluan:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ $letter['keperluan'] }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Tempat:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ $letter['tempat'] }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Tanggal:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ \Carbon\Carbon::parse($letter['tanggal_tugas'])->format('d/m/Y') }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs sm:text-sm text-gray-600 mb-1">Waktu:</p>
-                                                <p class="text-gray-800 text-sm sm:text-base">{{ $letter['jam'] }}</p>
-                                            </div>
+                                        <div>
+                                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Tempat:</p>
+                                            <p class="text-gray-800 text-sm sm:text-base">{{ $letter['tempat'] }}</p>
                                         </div>
-                                    @endif
+                                        <div>
+                                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Tanggal:</p>
+                                            <p class="text-gray-800 text-sm sm:text-base">{{ \Carbon\Carbon::parse($letter['tanggal_tugas'])->format('d/m/Y') }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Waktu:</p>
+                                            <p class="text-gray-800 text-sm sm:text-base">{{ $letter['jam'] }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
                             <!-- Action Buttons -->
-                            <!-- Action Buttons - Updated workflow -->
-                            <div class="button-group w-full lg:w-auto">
-                                <!-- Hanya ada tombol Selesai -->
-                                <form method="POST" class="w-full lg:w-auto" action="{{ route('dashboard.tu.process') }}">
+                            <div class="flex flex-col lg:flex-row gap-2 w-full lg:w-auto" style="position: relative; z-index: 10;">
+                                <!-- Tombol Selesai -->
+                                <form method="POST" action="{{ route('dashboard.tu.process') }}" style="position: relative; z-index: 10;">
                                     @csrf
                                     <input type="hidden" name="action" value="complete">
                                     <input type="hidden" name="letter_id" value="{{ $letter['id'] }}">
                                     <button type="submit" 
                                             class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm"
+                                            style="cursor: pointer; pointer-events: auto;"
                                             onclick="return confirm('Apakah Anda yakin surat ini sudah selesai diproses dan siap diambil?')">
                                         <i class="fas fa-check mr-2"></i>Selesai
                                     </button>
                                 </form>
                                 
+                                <!-- Tombol Preview -->
                                 <button onclick="openPreviewModal({{ $letter['id'] }})"
-                                        class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 flex items-center justify-center text-sm">
+                                        class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 flex items-center justify-center text-sm"
+                                        style="cursor: pointer; pointer-events: auto;">
                                     <i class="fas fa-eye mr-2"></i>Preview
                                 </button>
                                 
-                                <button class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm">
-                                    <i class="fas fa-print mr-2"></i>Cetak
-                                </button>
+                                <!-- Tombol Cetak -->
+                                <form method="POST" action="{{ route('surat.generate', $letter['id']) }}" target="_blank" style="position: relative; z-index: 10;">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm"
+                                            style="cursor: pointer; pointer-events: auto;">
+                                        <i class="fas fa-print mr-2"></i>Cetak
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                @endforeach
-                
-                @if(empty($approved_letters))
+                @empty
                     <div class="p-6 sm:p-8 text-center">
                         <i class="fas fa-inbox text-gray-300 text-3xl sm:text-4xl mb-4"></i>
                         <p class="text-gray-500 text-sm sm:text-base">Tidak ada surat yang perlu diproses</p>
                     </div>
-                @endif
+                @endforelse
             </div>
         </div>
 
@@ -323,7 +318,6 @@
                                         alt="Avatar {{ $letter['teacher'] }}" 
                                         class="w-full h-full object-cover"
                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <!-- Fallback -->
                                     <div class="w-full h-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold" style="display: none;">
                                         {{ strtoupper(substr($letter['teacher'], 0, 2)) }}
                                     </div>
@@ -343,7 +337,6 @@
                                 <p class="text-sm text-gray-800">{{ \Carbon\Carbon::parse($letter['completed_date'])->format('d/m/Y H:i') }}</p>
                             </div>
                             <div>
-                                <!-- Karena semua surat selesai otomatis sudah diberitahu, hanya tampilkan status ini -->
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <i class="fas fa-bell mr-1"></i>Sudah Diberitahu
                                 </span>
@@ -356,7 +349,6 @@
                                 <i class="fas fa-eye mr-1"></i>Lihat
                             </button>
                             
-                            <!-- Tombol Beritahu Ulang (selalu ada karena bisa perlu reminder) -->
                             <form method="POST" action="{{ route('dashboard.tu.resend-notification') }}" class="inline">
                                 @csrf
                                 <input type="hidden" name="letter_id" value="{{ $letter['id'] }}">
@@ -388,7 +380,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                         @foreach($completed_letters as $letter)
+                         @forelse($completed_letters as $letter)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
@@ -397,7 +389,6 @@
                                                 alt="Avatar {{ $letter['teacher'] }}" 
                                                 class="w-full h-full object-cover"
                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            <!-- Fallback -->
                                             <div class="w-full h-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold text-sm" style="display: none;">
                                                 {{ strtoupper(substr($letter['teacher'], 0, 2)) }}
                                             </div>
@@ -416,12 +407,9 @@
                                      {{ \Carbon\Carbon::parse($letter['completed_date'])->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                        <!-- Karena semua surat selesai otomatis sudah diberitahu, hanya tampilkan status ini -->
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            <i class="fas fa-bell mr-1"></i>Sudah Diberitahu
-                                        </span>
-                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-bell mr-1"></i>Sudah Diberitahu
+                                    </span>
                                 </td>
                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-xs lg:text-sm font-medium">
                                     <button onclick="openCompletedLetterModal({{ $letter['id'] }})" 
@@ -429,7 +417,6 @@
                                         <i class="fas fa-eye mr-1"></i>Lihat
                                     </button>
                                     
-                                    <!-- Tombol Beritahu Ulang (selalu ada) -->
                                     <form method="POST" action="{{ route('dashboard.tu.resend-notification') }}" class="inline">
                                         @csrf
                                         <input type="hidden" name="letter_id" value="{{ $letter['id'] }}">
@@ -445,16 +432,14 @@
                                     </button>
                                 </td>
                             </tr>
-                        @endforeach
-                        
-                        @if(empty($completed_letters))
+                        @empty
                             <tr>
                                 <td colspan="5" class="px-4 lg:px-6 py-6 lg:py-8 text-center text-gray-500">
                                     <i class="fas fa-inbox text-3xl lg:text-4xl mb-4 block text-gray-300"></i>
                                     <span class="text-sm lg:text-base">Tidak ada surat yang sudah selesai hari ini</span>
                                 </td>
                             </tr>
-                        @endif
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -595,20 +580,20 @@
     <script>
     // Data surat dari controller
     const letterData = @json($approved_letters);
+    const completedLetterData = @json($completed_letters_indexed ?? []);
     
-    console.log('Letter data:', letterData); // Debug log
+    console.log('Letter data:', letterData);
+    console.log('Completed Letter data:', completedLetterData);
 
     function openPreviewModal(letterId) {
-        console.log('Opening modal for letter ID:', letterId); // Debug log
+        console.log('Opening modal for letter ID:', letterId);
         
         document.getElementById('loadingSpinner').classList.remove('hidden');
         
-        // Simulasi loading delay
         setTimeout(() => {
             try {
-                // Cari berdasarkan ID, bukan index array
                 const letter = letterData.find(item => item.id == letterId);
-                console.log('Found letter:', letter); // Debug log
+                console.log('Found letter:', letter);
                 
                 if (letter) {
                     displayLetterDetails(letter);
@@ -624,7 +609,7 @@
             }
             
             document.getElementById('loadingSpinner').classList.add('hidden');
-        }, 500); // Berikan delay yang cukup untuk melihat loading
+        }, 500);
     }
 
     function displayLetterDetails(letter) {
@@ -652,11 +637,10 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        
                         <div>
                             <span class="text-sm font-medium text-gray-600">Status:</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${letter.status === 'need_processing' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}">
-                                ${letter.status === 'need_processing' ? 'Perlu Diproses' : 'Sedang Diproses'}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Sedang Diproses
                             </span>
                         </div>
                         <div>
@@ -704,7 +688,7 @@
                 <div class="space-y-3">
         `;
 
-        letter.guru_list.forEach((guru, index) => {
+        letter.guru_list.forEach((guru) => {
             html += `
                 <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-white shadow-sm mr-4">
@@ -736,196 +720,151 @@
             `;
         });
 
-        /* html += `
+        html += `
                 </div>
             </div>
-
-            <!-- Preview Surat -->
-            <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
-                <h5 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-eye text-purple-600 mr-2"></i>Preview Surat
-                </h5>
-                <div class="bg-gray-50 p-4 sm:p-6 rounded-lg border-2 border-dashed border-gray-300">
-                    <div class="text-center mb-6">
-                        <h6 class="text-base sm:text-lg font-bold mb-2">PEMERINTAH PROVINSI JAWA TIMUR</h6>
-                        <p class="text-sm font-semibold mb-1">DINAS PENDIDIKAN</p>
-                        <p class="text-sm font-semibold mb-4">SMA NEGERI 1 SURABAYA</p>
-                        <div class="border-b-2 border-black mb-4"></div>
-                        <h4 class="text-base font-bold underline">${letter.type.toUpperCase()}</h4>
-                        <p class="text-xs">Nomor: 421/00${letter.id}/SMA1-SBY/VIII/2025</p>
-                    </div>
-                    
-                    <div class="text-justify leading-relaxed text-sm">
-                        <p class="mb-3">Yang bertanda tangan di bawah ini Kepala SMA Negeri 1 Surabaya dengan ini ${letter.type === 'Surat Tugas' ? 'menugaskan' : 'memerintahkan'}:</p>
-                        
-                        <div class="ml-6 my-4 space-y-1">
-                            <p>Nama : ${letter.full_name}</p>
-                            <p>NIP : ${letter.nip}</p>
-                        </div>
-                        
-                        <p class="mb-3">Untuk melaksanakan tugas ${letter.keperluan} yang akan dilaksanakan di ${letter.tempat} pada hari ${letter.hari} tanggal ${new Date(letter.tanggal_tugas).toLocaleDateString('id-ID')} pukul ${letter.waktu || letter.jam} WIB.</p>
-                        <p>Demikian surat ${letter.type.toLowerCase()} ini dibuat untuk dilaksanakan dengan penuh tanggung jawab.</p>
-                    </div>
-                    
-                    <div class="mt-6 flex justify-between">
-                        <div></div>
-                        <div class="text-center">
-                            <p class="text-sm">Surabaya, ${new Date().toLocaleDateString('id-ID')}</p>
-                            <p class="mb-12 text-sm">Kepala Sekolah</p>
-                            <p class="font-bold text-sm">Dr. Ahmad Wijaya, M.Pd</p>
-                            <p class="text-sm">NIP. 196805121994031002</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `; */
+        `;
 
         content.innerHTML = html;
     }
 
-    const completedLetterData = @json($completed_letters_indexed ?? []);
-
-console.log('Completed Letter data:', completedLetterData); // Debug log
-
-// Fungsi untuk completed letters
-function openCompletedLetterModal(letterId) {
-    console.log('Opening completed modal for letter ID:', letterId);
-    
-    document.getElementById('loadingSpinner').classList.remove('hidden');
-    
-    setTimeout(() => {
-        try {
-            const letter = completedLetterData[letterId];
-            console.log('Found completed letter:', letter);
-            
-            if (letter) {
-                displayCompletedLetterDetails(letter);
-                document.getElementById('previewModal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                console.error('Completed letter not found with ID:', letterId);
-                alert('Data surat tidak ditemukan');
-            }
-        } catch (error) {
-            console.error('Error in openCompletedLetterModal:', error);
-            alert('Terjadi error saat membuka preview');
-        }
+    function openCompletedLetterModal(letterId) {
+        console.log('Opening completed modal for letter ID:', letterId);
         
-        document.getElementById('loadingSpinner').classList.add('hidden');
-    }, 500);
-}
+        document.getElementById('loadingSpinner').classList.remove('hidden');
+        
+        setTimeout(() => {
+            try {
+                const letter = completedLetterData[letterId];
+                console.log('Found completed letter:', letter);
+                
+                if (letter) {
+                    displayCompletedLetterDetails(letter);
+                    document.getElementById('previewModal').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    console.error('Completed letter not found with ID:', letterId);
+                    alert('Data surat tidak ditemukan');
+                }
+            } catch (error) {
+                console.error('Error in openCompletedLetterModal:', error);
+                alert('Terjadi error saat membuka preview');
+            }
+            
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }, 500);
+    }
 
-function displayCompletedLetterDetails(letter) {
-    const content = document.getElementById('letterDetailContent');
-    
-    let html = `
-        <!-- Header Information -->
-        <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6 rounded-lg border border-green-200">
-            <h4 class="text-lg sm:text-xl font-bold text-green-900 mb-3 flex items-center">
-                <i class="fas fa-file-alt text-green-600 mr-2"></i>${letter.type}
-                <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <i class="fas fa-check mr-1"></i>Selesai
-                </span>
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <div>
-                        <span class="text-sm font-medium text-gray-600">Nama Lengkap:</span>
-                        <p class="font-semibold text-gray-900">${letter.full_name}</p>
+    function displayCompletedLetterDetails(letter) {
+        const content = document.getElementById('letterDetailContent');
+        
+        let html = `
+            <!-- Header Information -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6 rounded-lg border border-green-200">
+                <h4 class="text-lg sm:text-xl font-bold text-green-900 mb-3 flex items-center">
+                    <i class="fas fa-file-alt text-green-600 mr-2"></i>${letter.type}
+                    <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <i class="fas fa-check mr-1"></i>Selesai
+                    </span>
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Nama Lengkap:</span>
+                            <p class="font-semibold text-gray-900">${letter.full_name}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">NIP:</span>
+                            <p class="font-mono text-gray-900">${letter.nip}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">No. Telepon:</span>
+                            <p class="font-mono text-gray-900">${letter.phone}</p>
+                        </div>
                     </div>
-                    <div>
-                        <span class="text-sm font-medium text-gray-600">NIP:</span>
-                        <p class="font-mono text-gray-900">${letter.nip}</p>
-                    </div>
-                    <div>
-                        <span class="text-sm font-medium text-gray-600">No. Telepon:</span>
-                        <p class="font-mono text-gray-900">${letter.phone}</p>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    
-                    <div>
-                        <span class="text-sm font-medium text-gray-600">Tanggal Selesai:</span>
-                        <p class="text-gray-900">${new Date(letter.completed_date).toLocaleDateString('id-ID')} ${new Date(letter.completed_date).toLocaleTimeString('id-ID')}</p>
-                    </div>
-                    <div>
-                        <span class="text-sm font-medium text-gray-600">Status Notifikasi:</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${letter.pickup_notified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                            <i class="fas ${letter.pickup_notified ? 'fa-bell' : 'fa-bell-slash'} mr-1"></i>
-                            ${letter.pickup_notified ? 'Sudah Diberitahu' : 'Belum Diberitahu'}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detail Surat -->
-        <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
-            <h5 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-info-circle text-indigo-600 mr-2"></i>Detail Keperluan
-            </h5>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <span class="block text-sm font-medium text-gray-600 mb-1">Keperluan:</span>
-                        <p class="text-gray-900">${letter.keperluan}</p>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <span class="block text-sm font-medium text-gray-600 mb-1">Tempat:</span>
-                        <p class="text-gray-900">${letter.tempat}</p>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <span class="block text-sm font-medium text-gray-600 mb-1">Hari/Tanggal:</span>
-                        <p class="text-gray-900">${letter.hari}, ${new Date(letter.tanggal_tugas).toLocaleDateString('id-ID')}</p>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <span class="block text-sm font-medium text-gray-600 mb-1">Jam:</span>
-                        <p class="text-gray-900">${letter.jam}</p>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Tanggal Selesai:</span>
+                            <p class="text-gray-900">${new Date(letter.completed_date).toLocaleDateString('id-ID')} ${new Date(letter.completed_date).toLocaleTimeString('id-ID')}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Status Notifikasi:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${letter.pickup_notified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                <i class="fas ${letter.pickup_notified ? 'fa-bell' : 'fa-bell-slash'} mr-1"></i>
+                                ${letter.pickup_notified ? 'Sudah Diberitahu' : 'Belum Diberitahu'}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Data Guru -->
-        <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
-            <h5 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-users text-green-600 mr-2"></i>Data Guru Terlibat
-            </h5>
-            <div class="space-y-3">`;
+            <!-- Detail Surat -->
+            <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
+                <h5 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-info-circle text-indigo-600 mr-2"></i>Detail Keperluan
+                </h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="block text-sm font-medium text-gray-600 mb-1">Keperluan:</span>
+                            <p class="text-gray-900">${letter.keperluan}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="block text-sm font-medium text-gray-600 mb-1">Tempat:</span>
+                            <p class="text-gray-900">${letter.tempat}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="block text-sm font-medium text-gray-600 mb-1">Hari/Tanggal:</span>
+                            <p class="text-gray-900">${letter.hari}, ${new Date(letter.tanggal_tugas).toLocaleDateString('id-ID')}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="block text-sm font-medium text-gray-600 mb-1">Jam:</span>
+                            <p class="text-gray-900">${letter.jam}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    letter.guru_list.forEach((guru, index) => {
+            <!-- Data Guru -->
+            <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
+                <h5 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-users text-green-600 mr-2"></i>Data Guru Terlibat
+                </h5>
+                <div class="space-y-3">`;
+
+        letter.guru_list.forEach((guru) => {
+            html += `
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm mr-4">
+                        ${guru.nama.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div>
+                                <span class="text-xs text-gray-600">Nama:</span>
+                                <p class="font-medium text-gray-900">${guru.nama}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-600">NIP:</span>
+                                <p class="font-mono text-sm text-gray-900">${guru.nip}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-600">Keterangan:</span>
+                                <p class="text-gray-900">${guru.keterangan}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
         html += `
-            <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm mr-4">
-                    ${guru.nama.split(' ').map(n => n[0]).join('').toUpperCase()}
-                </div>
-                <div class="flex-1">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <div>
-                            <span class="text-xs text-gray-600">Nama:</span>
-                            <p class="font-medium text-gray-900">${guru.nama}</p>
-                        </div>
-                        <div>
-                            <span class="text-xs text-gray-600">NIP:</span>
-                            <p class="font-mono text-sm text-gray-900">${guru.nip}</p>
-                        </div>
-                        <div>
-                            <span class="text-xs text-gray-600">Keterangan:</span>
-                            <p class="text-gray-900">${guru.keterangan}</p>
-                        </div>
-                    </div>
                 </div>
             </div>`;
-    });
 
-    html += `
-            </div>
-        </div>`;
-
-    content.innerHTML = html;
-}
+        content.innerHTML = html;
+    }
 
     function closeModal(modalId) {
         document.getElementById(modalId).classList.add('hidden');

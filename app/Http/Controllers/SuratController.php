@@ -19,6 +19,10 @@ use App\Events\SuratCreated;
 use App\Events\SuratStatusUpdated;
 use App\Events\NotifikasiCreated;
 use App\Models\TemplateSurat;
+use Illuminate\Support\Facades\Config;
+use App\Models\Provinsi;
+use App\Models\DinasSurat;
+use App\Models\Sekolah;
 
 class SuratController extends Controller
 {
@@ -129,13 +133,53 @@ class SuratController extends Controller
                 // If lookup fails, keep null (id_template is nullable) and log
                 Log::warning('Unable to resolve template for jenis '.$request->jenis.': '.$e->getMessage());
             }
+            // Determine id_jenis_surat to store on submit: prefer explicit input, else infer from jenis
+            $jenisId = null;
+            if ($request->filled('id_jenis_surat')) {
+                $jenisId = intval($request->input('id_jenis_surat'));
+            } else {
+                if ($request->jenis === 'dispensasi' || $request->jenis === 'surat-dispensasi') {
+                    $jenisId = 1; // dispensasi (adjust if your DB uses different ids)
+                } elseif ($request->jenis === 'spt' || $request->jenis === 'surat-perintah-tugas') {
+                    $jenisId = 2; // perintah tugas
+                }
+            }
             // 1. SURAT
-            $surat = Surat::create([
+            $suratData = [
                 'id_pengguna'   => $user->id_pengguna,
                 'id_template'   => $templateId,
                 'status_berkas' => 'pending',
                 'dibuat_pada'   => now(),
-            ]);
+            ];
+
+            // store id_jenis_surat and optional regional identifiers if provided
+            if (!is_null($jenisId)) {
+                $suratData['id_jenis_surat'] = $jenisId;
+            }
+
+            // Fill regional identifiers from request or resolve id by kode from config
+            if ($request->filled('id_provinsi')) {
+                $suratData['id_provinsi'] = $request->input('id_provinsi');
+            } else {
+                $kodeProv = Config::get('nomor_surat.provinsi_code');
+                $suratData['id_provinsi'] = Provinsi::where('kode_provinsi', $kodeProv)->value('id') ?? null;
+            }
+
+            if ($request->filled('id_dinas')) {
+                $suratData['id_dinas'] = $request->input('id_dinas');
+            } else {
+                $kodeDinas = Config::get('nomor_surat.dinas_code');
+                $suratData['id_dinas'] = DinasSurat::where('kode_dinas', $kodeDinas)->value('id') ?? null;
+            }
+
+            if ($request->filled('id_sekolah')) {
+                $suratData['id_sekolah'] = $request->input('id_sekolah');
+            } else {
+                $kodeSek = Config::get('nomor_surat.sekolah_code');
+                $suratData['id_sekolah'] = Sekolah::where('kode_sekolah', $kodeSek)->value('id') ?? null;
+            }
+
+            $surat = Surat::create($suratData);
 
             // 2. PERSETUJUAN
             $persetujuan = Persetujuan::create([

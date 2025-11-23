@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Persetujuan;
 use App\Helpers\NotifikasiHelper;
+use App\Helpers\NomorSuratHelper;
 
 class PersetujuanController extends Controller
 {
@@ -25,6 +26,16 @@ class PersetujuanController extends Controller
         if ($surat) {
             $surat->status_berkas = $req->disetujui === 'ya' ? 'disetujui' : 'ditolak';
             $surat->save();
+
+            // If approved by Kepala Sekolah, generate nomor surat if not yet generated
+            if ($req->disetujui === 'ya') {
+                try {
+                    NomorSuratHelper::generate($surat);
+                } catch (\Exception $e) {
+                    // don't block the flow; log if needed
+                    \Log::error('Failed to generate nomor surat: '.$e->getMessage());
+                }
+            }
         }
 
         NotifikasiHelper::insert(

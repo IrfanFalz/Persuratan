@@ -1036,59 +1036,6 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Global data
-    let guruData = [], siswaData = [];
-    Promise.all([fetch('/guru-data').then(r=>r.json()), fetch('/siswa-data').then(r=>r.json())])
-        .then(([guru, siswa]) => { guruData = guru; siswaData = siswa; })
-        .catch(()=>{ guruData=[]; siswaData=[]; });
-
-    // Tambah Guru (SPT)
-    const addGuruBtn = document.getElementById('add-guru');
-    const guruContainer = document.getElementById('guru-container');
-    if (addGuruBtn) {
-        addGuruBtn.addEventListener('click', function() {
-            const row = document.createElement('div');
-            row.className = 'guru-row ...';
-            row.innerHTML = `
-                ... // isi input nama_guru, nip_guru, keterangan_guru, tombol hapus
-            `;
-            guruContainer.appendChild(row);
-            setupAutocompleteForNewRow(row, 'guru');
-            row.querySelector('.remove-row').addEventListener('click', ()=>row.remove());
-        });
-    }
-
-    // Tambah Siswa (Dispensasi)
-    const addSiswaBtn = document.getElementById('add-siswa-dispensasi');
-    const siswaContainer = document.getElementById('siswa-dispensasi-container');
-    if (addSiswaBtn) {
-        addSiswaBtn.addEventListener('click', function() {
-            const row = document.createElement('div');
-            row.className = 'siswa-row ...';
-            row.innerHTML = `
-                ... // isi input nama_siswa, nisn, kelas, tombol hapus
-            `;
-            siswaContainer.appendChild(row);
-            row.querySelector('.remove-row').addEventListener('click', ()=>row.remove());
-        });
-    }
-
-    // Event delegation remove row
-    document.addEventListener('click', function(e){
-        if(e.target.closest('.remove-row')) {
-            e.target.closest('.guru-row, .siswa-row, .guru-ditemui-row, .siswa-ortu-row')?.remove();
-        }
-    });
-
-    // Hide dropdown klik di luar
-    document.addEventListener('click', function(e) {
-        document.querySelectorAll('.guru-dropdown, .siswa-ortu-dropdown').forEach(dd=>{
-            if (!dd.contains(e.target) && !dd.previousElementSibling.contains(e.target)) dd.classList.add('hidden');
-        });
-    });
-});
-
 // Hide dropdown saat klik di luar untuk semua dropdown
 document.addEventListener('click', function(e) {
     // Hide semua dropdown autocomplete

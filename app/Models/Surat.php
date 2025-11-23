@@ -14,6 +14,12 @@ class Surat extends Model
         'id_pengguna',
         'id_persetujuan',
         'id_template',
+        'id_jenis_surat',
+        'id_provinsi',
+        'id_dinas',
+        'id_sekolah',
+        'nomor_urut',
+        'nomor_surat',
         'status_berkas',
         'nomor_surat',
         'dibuat_pada'

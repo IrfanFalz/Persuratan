@@ -104,7 +104,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 mb-1">Diajukan</p>
-                    <p class="text-3xl font-bold text-orange-600">{{ $historySuratPaginated->where('status_berkas', 'pending')->count() }}</p>
+                    <p class="text-3xl font-bold text-orange-600">{{ $countPending ?? $historySuratPaginated->where('status_berkas', 'pending')->count() }}</p>
                 </div>
                 <div class="p-3 bg-orange-100 rounded-xl">
                     <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 mb-1">Disetujui</p>
-                    <p class="text-3xl font-bold text-yellow-600">{{ $historySuratPaginated->where('status_berkas', 'approve')->count() }}</p>
+                    <p class="text-3xl font-bold text-yellow-600">{{ $countApproved ?? $historySuratPaginated->where('status_berkas', 'approve')->count() }}</p>
                 </div>
                 <div class="p-3 bg-yellow-100 rounded-xl">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +132,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 mb-1">Selesai</p>
-                    <p class="text-3xl font-bold text-green-600">{{ $historySuratPaginated->where('status_berkas', 'selesai')->count() }}</p>
+                    <p class="text-3xl font-bold text-green-600">{{ $countSelesai ?? $historySuratPaginated->where('status_berkas', 'selesai')->count() }}</p>
                 </div>
                 <div class="p-3 bg-green-100 rounded-xl">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,10 +163,26 @@
 
                 <tbody class="divide-y divide-gray-100" id="tableBody">
                     @foreach ($historySuratPaginated as $index => $surat)
+                        @php
+                            // Normalize status to canonical keys used by filters
+                            $rawStatus = strtolower(trim($surat->status_berkas ?? ''));
+                            if (in_array($rawStatus, ['pending', 'diajukan', 'diajukan'])) {
+                                $statusKey = 'pending';
+                            } elseif (in_array($rawStatus, ['approve', 'approved', 'disetujui', 'diproses'])) {
+                                $statusKey = 'approve';
+                            } elseif (in_array($rawStatus, ['decline', 'ditolak', 'declined', 'rejected', 'rejected'])) {
+                                $statusKey = 'decline';
+                            } elseif ($rawStatus === 'selesai' || $rawStatus === 'completed') {
+                                $statusKey = 'selesai';
+                            } else {
+                                $statusKey = $rawStatus ?: 'unknown';
+                            }
+                        @endphp
+
                         <tr class="hover:bg-gray-50 transition-colors duration-200"
                             data-pengaju="{{ strtolower($surat->pengguna->nama ?? '-') }}"
                             data-jenis="{{ $surat->template->nama ?? '-' }}"
-                            data-status="{{ $surat->status_berkas }}"
+                            data-status="{{ $statusKey }}"
                             data-tanggal="{{ $surat->dibuat_pada }}">
                             {{-- Nomor urut --}}
                             <td class="px-6 py-4 text-sm text-gray-600">
@@ -330,22 +346,30 @@ function filterTable() {
         let matchesPeriode = true;
         if (periodeFilter) {
             const suratDate = new Date(tanggal);
-            const today = new Date();
-            
+            const now = new Date();
+
             switch (periodeFilter) {
                 case 'hari-ini':
-                    matchesPeriode = suratDate.toDateString() === today.toDateString();
+                    matchesPeriode = suratDate.toDateString() === now.toDateString();
                     break;
                 case 'minggu-ini':
-                    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-                    matchesPeriode = suratDate >= startOfWeek;
+                    // compute week start (Monday) and end (Sunday) without mutating shared Date
+                    const day = now.getDay(); // 0 (Sun) .. 6 (Sat)
+                    const diffToMonday = (day + 6) % 7; // 0 if Monday, 6 if Sunday
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setHours(0,0,0,0);
+                    startOfWeek.setDate(now.getDate() - diffToMonday);
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(startOfWeek.getDate() + 6);
+                    endOfWeek.setHours(23,59,59,999);
+                    matchesPeriode = suratDate >= startOfWeek && suratDate <= endOfWeek;
                     break;
                 case 'bulan-ini':
-                    matchesPeriode = suratDate.getMonth() === today.getMonth() && 
-                                   suratDate.getFullYear() === today.getFullYear();
+                    matchesPeriode = suratDate.getMonth() === now.getMonth() && 
+                                   suratDate.getFullYear() === now.getFullYear();
                     break;
                 case 'tahun-ini':
-                    matchesPeriode = suratDate.getFullYear() === today.getFullYear();
+                    matchesPeriode = suratDate.getFullYear() === now.getFullYear();
                     break;
             }
         }

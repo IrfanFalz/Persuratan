@@ -81,4 +81,5 @@ Route::middleware(['auth','checkRole:ADMIN'])->group(function () {
 
     Route::get('/admin/kelola-guru', [DashboardAdminController::class, 'kelolaGuru'])->name('admin.kelola-guru');
     Route::get('/admin/kelola-surat', [DashboardAdminController::class, 'kelolaSurat'])->name('admin.kelola-surat');
+
 });

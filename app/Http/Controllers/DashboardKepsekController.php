@@ -107,6 +107,13 @@ class DashboardKepsekController extends Controller
         $surat->status_berkas = 'approved';
         $surat->save();
 
+        // Generate nomor surat if approved and nomor not yet generated
+        try {
+            \App\Helpers\NomorSuratHelper::generate($surat);
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate nomor surat on Kepsek approval: '.$e->getMessage());
+        }
+
         $message = "Surat dari {$teacher} berhasil disetujui dan diteruskan ke TU.";
         $status = 'success';
         $notifStatus = 'disetujui';

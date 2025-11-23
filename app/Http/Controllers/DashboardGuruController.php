@@ -31,13 +31,19 @@ class DashboardGuruController extends Controller
                  * ditolak      = kepsek tolak
                  * selesai      = TU klik selesai
                  */
-                $status = match ($surat->status_berkas) {
-                    'pending'   => 'pending',
-                    'disetujui' => 'approved',
-                    'ditolak'   => 'declined',
-                    'selesai'   => 'done',
-                    default     => 'pending'
-                };
+                $rawStatus = strtolower(trim($surat->status_berkas ?? ''));
+
+                if (in_array($rawStatus, ['pending', 'diajukan'])) {
+                    $status = 'pending';
+                } elseif (in_array($rawStatus, ['disetujui', 'approve', 'approved', 'diproses'])) {
+                    $status = 'approved';
+                } elseif (in_array($rawStatus, ['ditolak', 'decline', 'declined'])) {
+                    $status = 'declined';
+                } elseif (in_array($rawStatus, ['selesai', 'done'])) {
+                    $status = 'done';
+                } else {
+                    $status = 'pending';
+                }
 
                 /**
                  * PROGRESS BAR 3 STEP
@@ -60,9 +66,9 @@ class DashboardGuruController extends Controller
                 if ($surat->suratDispensasi) {
                     $guruData = $surat->suratDispensasi->detail->map(function ($d) {
                         return (object)[
-                            'nama'       => $d->nama ?? '-',
-                            'nip'        => $d->nip ?? '-',
-                            'keterangan' => $d->keterangan ?? '-',
+                            'nama'       => $d->nama_siswa ?? '-',
+                            'nip'        => $d->nisn ?? '-',
+                            'keterangan' => $d->kelas ?? '-',
                         ];
                     });
                 } elseif ($surat->suratPerintahTugas) {
