@@ -62,15 +62,23 @@ Route::middleware(['auth','checkRole:ADMIN'])->group(function () {
     Route::post('/admin/users/{id}', [DashboardAdminController::class, 'usersUpdate'])->name('admin.users.update');
     Route::delete('/admin/users/{id}', [DashboardAdminController::class, 'usersDelete'])->name('admin.users.delete');
 
-    Route::get('/admin/templates', [TemplateSuratController::class, 'index'])->name('templates.index');
-    Route::post('/admin/templates', [TemplateSuratController::class, 'store'])->name('templates.store');
-    Route::get('/admin/templates/{id}/edit', [TemplateSuratController::class, 'edit'])->name('templates.edit');
-    Route::post('/admin/templates/{id}', [TemplateSuratController::class, 'update'])->name('templates.update');
-    Route::delete('/admin/templates/{id}', [TemplateSuratController::class, 'destroy'])->name('templates.destroy');
+    Route::get('/admin/template-surat', [DashboardAdminController::class, 'templatesIndex'])
+        ->name('templates.index');
+    Route::post('/admin/template-surat', [DashboardAdminController::class, 'templatesStore'])
+        ->name('templates.store');
 
-    Route::get('/admin/templates/{id}', [TemplateSuratController::class, 'show'])->name('templates.show');
+    Route::put('/admin/template-surat/{id}', [DashboardAdminController::class, 'templatesUpdate'])
+        ->name('templates.update');
+
+    Route::delete('/admin/template-surat/{id}', [DashboardAdminController::class, 'templatesDelete'])
+        ->name('templates.destroy');
+
+    Route::get('/admin/template-surat/{id}/preview', [DashboardAdminController::class, 'viewTemplate'])
+        ->name('templates.preview');
+
+    Route::post('/admin/template-surat/upload', [TemplateSuratController::class, 'uploadImage'])
+        ->name('templates.upload-image');
 
     Route::get('/admin/kelola-guru', [DashboardAdminController::class, 'kelolaGuru'])->name('admin.kelola-guru');
-    Route::delete('/admin/users/{id}', [DashboardAdminController::class, 'usersDelete'])->name('admin.users.delete');
     Route::get('/admin/kelola-surat', [DashboardAdminController::class, 'kelolaSurat'])->name('admin.kelola-surat');
 });

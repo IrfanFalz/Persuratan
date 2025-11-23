@@ -509,7 +509,7 @@
                                     <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewLetter({{ $request->id }})">
                                         <i class="fas fa-eye mr-1"></i>Lihat
                                     </button>
-                                    @if($request->processed_by_tu)
+                                    @if($request->status === 'approved')
                                         <button class="text-green-600 hover:text-green-900">
                                             <i class="fas fa-download mr-1"></i>Cetak
                                         </button>

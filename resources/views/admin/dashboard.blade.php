@@ -319,7 +319,7 @@
                             <td class="py-4 px-6">
                                 <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full 
                                     {{ $surat['jenis'] == 'Surat Dispensasi' ? 'badge-blue' : 'badge-purple' }}">
-                                    {{ $surat->jenis ?? '-' }}
+                                    {{ $surat->template ? $surat->template->nama : '-' }}
                                 </span>
                             </td>
                             <td class="py-4 px-6 text-sm font-medium text-gray-700">

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use App\Events\SuratCreated;
 use App\Events\SuratStatusUpdated;
 use App\Events\NotifikasiCreated;
+use App\Models\TemplateSurat;
 
 class SuratController extends Controller
 {
@@ -41,6 +42,40 @@ class SuratController extends Controller
             ->get();
 
         return view('guru.dashboard', compact('surat', 'notifikasi'));
+    }
+
+    /**
+     * Try to parse various user-provided jam formats into SQL TIME (H:i:s).
+     * Returns null if unable to parse.
+     */
+    protected function parseJam($jam)
+    {
+        if (empty($jam)) return null;
+
+        // Normalize common separators
+        $s = str_replace('.', ':', $jam);
+
+        // Find first occurrence of HH:MM or HH:MM:SS
+        if (preg_match('/\b(\d{1,2}:\d{2}(?::\d{2})?)\b/', $s, $m)) {
+            $time = $m[1];
+            if (preg_match('/^\d{1,2}:\d{2}$/', $time)) {
+                $time .= ':00';
+            }
+            $parts = explode(':', $time);
+            $h = str_pad($parts[0], 2, '0', STR_PAD_LEFT);
+            $i = str_pad($parts[1], 2, '0', STR_PAD_LEFT);
+            $sec = isset($parts[2]) ? str_pad($parts[2], 2, '0', STR_PAD_LEFT) : '00';
+            return "{$h}:{$i}:{$sec}";
+        }
+
+        // Fallback to strtotime if possible
+        $ts = strtotime($jam);
+        if ($ts !== false) {
+            return date('H:i:s', $ts);
+        }
+
+        Log::warning('Unable to parse jam value: '.$jam);
+        return null;
     }
 
     public function create()
@@ -75,10 +110,29 @@ class SuratController extends Controller
         DB::beginTransaction();
 
         try {
+            // Determine template id: prefer request-provided id_template when valid,
+            // otherwise attempt to lookup by jenis (tipe)
+            $templateId = null;
+            try {
+                if ($request->filled('id_template')) {
+                    $t = TemplateSurat::find($request->input('id_template'));
+                    if ($t) {
+                        $templateId = $t->id;
+                    }
+                }
+
+                if (is_null($templateId)) {
+                    $template = TemplateSurat::where('tipe', $request->jenis)->first();
+                    $templateId = $template ? $template->id : null;
+                }
+            } catch (\Exception $e) {
+                // If lookup fails, keep null (id_template is nullable) and log
+                Log::warning('Unable to resolve template for jenis '.$request->jenis.': '.$e->getMessage());
+            }
             // 1. SURAT
             $surat = Surat::create([
                 'id_pengguna'   => $user->id_pengguna,
-                'id_template'   => null,
+                'id_template'   => $templateId,
                 'status_berkas' => 'pending',
                 'dibuat_pada'   => now(),
             ]);
@@ -107,8 +161,8 @@ class SuratController extends Controller
                ============================= */
 
             /* =============================
-                   SURAT DISPENSASI
-               ============================= */
+                SURAT DISPENSASI
+            ============================= */
             if ($request->jenis === 'dispensasi') {
 
                 $disp = SuratDispensasi::create([
@@ -117,27 +171,24 @@ class SuratController extends Controller
                     'keperluan'      => $request->keperluan,
                     'tempat'         => $request->tempat,
                     'tanggal'        => $request->tanggal,
-                    'jam'            => $request->jam,
+                    'jam'            => $this->parseJam($request->jam),
                     'hari'           => $request->hari,
                     'lampiran'       => $lampiranPath,
                 ]);
 
-                // Ambil array siswa (sesuai Blade)
-                $namaArr  = $request->nama_siswa ?? [];
-                $nisnArr  = $request->nisn ?? [];
-                $kelasArr = $request->kelas_siswa ?? [];
+                // Ambil array siswa
+                $namaArr  = $request->input('nama_siswa', []);
+                $nisnArr  = $request->input('nisn', []);
+                $kelasArr = $request->input('kelas_siswa', []);
 
-                $count = max(count($namaArr), count($nisnArr), count($kelasArr));
-
-                for ($i = 0; $i < $count; $i++) {
-                    if (empty($namaArr[$i]) && empty($nisnArr[$i]) && empty($kelasArr[$i])) {
-                        continue;
-                    }
+                // Loop berdasarkan NISN agar tidak Undefined key
+                foreach ($nisnArr as $i => $nisn) {
+                    if (empty($nisn)) continue;
 
                     DetailDispensasi::create([
                         'id_sd'      => $disp->id_sd,
+                        'nisn'       => $nisn,
                         'nama_siswa' => $namaArr[$i] ?? null,
-                        'nisn'       => $nisnArr[$i] ?? null,
                         'kelas'      => $kelasArr[$i] ?? null,
                     ]);
                 }
@@ -154,12 +205,12 @@ class SuratController extends Controller
                     'keperluan'      => $request->keperluan,
                     'tempat'         => $request->tempat,
                     'tanggal'        => $request->tanggal,
-                    'jam'            => $request->jam,
+                    'jam'            => $this->parseJam($request->jam),
                     'hari'           => $request->hari,
                     'lampiran'       => $lampiranPath,
                 ]);
 
-                // Ambil array guru (sesuai Blade)
+                // Ambil array guru
                 $namaGuruArr = $request->nama_guru ?? [];
                 $nipGuruArr  = $request->nip_guru ?? [];
                 $ketGuruArr  = $request->keterangan_guru ?? [];
@@ -167,10 +218,7 @@ class SuratController extends Controller
                 $countGuru = max(count($namaGuruArr), count($nipGuruArr), count($ketGuruArr));
 
                 for ($i = 0; $i < $countGuru; $i++) {
-
-                    if (empty($namaGuruArr[$i]) &&
-                        empty($nipGuruArr[$i]) &&
-                        empty($ketGuruArr[$i])) {
+                    if (empty($namaGuruArr[$i]) && empty($nipGuruArr[$i]) && empty($ketGuruArr[$i])) {
                         continue;
                     }
 

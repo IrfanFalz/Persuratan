@@ -18,7 +18,7 @@ class DashboardTuController extends Controller
         // SURAT YANG SUDAH DISETUJUI KEPSEK, TAPI BELUM SELESAI (status: disetujui)
         $approved_letters = Surat::with(['pengguna', 'suratDispensasi', 'suratPerintahTugas'])
             ->where('status_berkas', 'disetujui')
-            ->latest()
+            ->orderBy('dibuat_pada', 'desc')
             ->get()
             ->map(function ($surat) {
                 $detail = $surat->suratDispensasi ?? $surat->suratPerintahTugas;
@@ -30,7 +30,7 @@ class DashboardTuController extends Controller
                     'phone' => $surat->pengguna->no_telp,
                     'full_name' => $surat->pengguna->nama,
                     'type' => $surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
-                    'approved_date' => $surat->updated_at->format('Y-m-d'),
+                    'approved_date' => date('Y-m-d', strtotime($surat->dibuat_pada)),
                     'status' => 'approved',
                     'keperluan' => $detail->keperluan ?? '-',
                     'tempat' => $detail->tempat ?? '-',
@@ -45,7 +45,7 @@ class DashboardTuController extends Controller
         // SURAT YANG SUDAH SELESAI (status: selesai)
         $completed_letters = Surat::with(['pengguna', 'suratDispensasi', 'suratPerintahTugas'])
             ->where('status_berkas', 'selesai')
-            ->latest()
+            ->orderBy('dibuat_pada', 'desc')
             ->get()
             ->map(function ($surat) {
                 $detail = $surat->suratDispensasi ?? $surat->suratPerintahTugas;
@@ -57,9 +57,9 @@ class DashboardTuController extends Controller
                     'phone' => $surat->pengguna->no_telp,
                     'full_name' => $surat->pengguna->nama,
                     'type' => $surat->suratDispensasi ? 'Surat Dispensasi' : 'Surat Perintah Tugas',
-                    'completed_date' => $surat->updated_at->format('Y-m-d H:i:s'),
+                    'completed_date' => date('Y-m-d H:i:s', strtotime($surat->dibuat_pada)),
                     'status' => 'completed',
-                    'pickup_notified' => true, // Otomatis true karena sudah diberitahu saat selesai
+                    'pickup_notified' => true,
                     'keperluan' => $detail->keperluan ?? '-',
                     'tempat' => $detail->tempat ?? '-',
                     'tanggal_tugas' => $detail->tanggal ?? '-',

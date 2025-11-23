@@ -62,7 +62,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @foreach($dataGuru as $index => $guru)
+                    @foreach($users as $index => $guru)
                     <tr class="hover:bg-gray-50 transition-colors duration-200" 
                         data-nama="{{ strtolower($guru->nama) }}" 
                         data-nip="{{ strtolower($guru->nip) }}" 

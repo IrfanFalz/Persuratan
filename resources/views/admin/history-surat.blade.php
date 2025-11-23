@@ -55,9 +55,10 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select id="statusFilter" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300">
                     <option value="">Semua Status</option>
-                    <option value="Diajukan">Diajukan</option>
-                    <option value="Diproses">Diproses</option>
-                    <option value="Selesai">Selesai</option>
+                    <option value="pending">Diajukan</option>
+                    <option value="approve">Disetujui</option>
+                    <option value="decline">Ditolak</option>
+                    <option value="selesai">Selesai</option>
                 </select>
             </div>
             
@@ -103,7 +104,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 mb-1">Diajukan</p>
-                    <p class="text-3xl font-bold text-orange-600">{{ $historySuratPaginated->where('status', 'Diajukan')->count() }}</p>
+                    <p class="text-3xl font-bold text-orange-600">{{ $historySuratPaginated->where('status_berkas', 'pending')->count() }}</p>
                 </div>
                 <div class="p-3 bg-orange-100 rounded-xl">
                     <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,8 +117,8 @@
         <div class="card-shadow rounded-2xl p-6 bg-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600 mb-1">Diproses</p>
-                    <p class="text-3xl font-bold text-yellow-600">{{ $historySuratPaginated->where('status', 'Diproses')->count() }}</p>
+                    <p class="text-sm font-medium text-gray-600 mb-1">Disetujui</p>
+                    <p class="text-3xl font-bold text-yellow-600">{{ $historySuratPaginated->where('status_berkas', 'approve')->count() }}</p>
                 </div>
                 <div class="p-3 bg-yellow-100 rounded-xl">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +132,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 mb-1">Selesai</p>
-                    <p class="text-3xl font-bold text-green-600">{{ $historySuratPaginated->where('status', 'Selesai')->count() }}</p>
+                    <p class="text-3xl font-bold text-green-600">{{ $historySuratPaginated->where('status_berkas', 'selesai')->count() }}</p>
                 </div>
                 <div class="p-3 bg-green-100 rounded-xl">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,14 +163,18 @@
 
                 <tbody class="divide-y divide-gray-100" id="tableBody">
                     @foreach ($historySuratPaginated as $index => $surat)
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <tr class="hover:bg-gray-50 transition-colors duration-200"
+                            data-pengaju="{{ strtolower($surat->pengguna->nama ?? '-') }}"
+                            data-jenis="{{ $surat->template->nama ?? '-' }}"
+                            data-status="{{ $surat->status_berkas }}"
+                            data-tanggal="{{ $surat->dibuat_pada }}">
                             {{-- Nomor urut --}}
                             <td class="px-6 py-4 text-sm text-gray-600">
                                 {{ ($pagination['current_page'] - 1) * $pagination['per_page'] + $index + 1 }}
                             </td>
 
                             {{-- Guru Pengaju --}}
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-semibold text-gray-900">
                                     {{ $surat->pengguna->nama ?? '-' }}
                                 </div>
@@ -178,7 +183,7 @@
                             {{-- Jenis Surat --}}
                             <td class="px-6 py-4">
                                 <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                                    {{ $surat->template->nama ?? '-' }}
+                                    {{ $surat->template ? $surat->template->nama : '-' }}
                                 </span>
                             </td>
 
@@ -201,30 +206,38 @@
 
                             {{-- Aksi --}}
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    {{-- Tombol Detail --}}
-                                    <button onclick="viewDetail({{ json_encode($surat) }})"
-                                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300"
-                                        title="Lihat Detail">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </button>
-
-                                    {{-- Tombol Download hanya jika status Selesai --}}
-                                    @if ($surat->status == 'Selesai')
-                                        <button onclick="downloadSurat({{ $surat->id }})"
-                                            class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all duration-300"
-                                            title="Download Surat">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex items-center overflow-visible">
+                                    <div class="inline-flex items-center gap-1 bg-white/0 hover:bg-gray-50 rounded-md p-0.5 overflow-visible">
+                                        {{-- Tombol Detail --}}
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center justify-center w-6 h-6 p-0.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-150"
+                                            title="Lihat Detail"
+                                            onclick="viewDetailFromButton(this)"
+                                            aria-label="Lihat Detail"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                             </svg>
                                         </button>
-                                    @endif
+
+                                        {{-- Tombol Download hanya jika status Selesai --}}
+                                            @if ($surat->status_berkas === 'selesai')
+                                            <button onclick="downloadSurat({{ $surat->id_surat }})"
+                                                class="inline-flex items-center justify-center w-6 h-6 p-0.5 text-green-600 hover:bg-green-50 rounded-md transition-colors duration-150"
+                                                title="Download Surat" aria-label="Download Surat">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 10v6m0 0l-3-3m3 3l3-3"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M21 21H7a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -357,42 +370,61 @@ function resetFilters() {
 }
 
 function viewDetail(surat) {
+
+    const pengaju = surat.pengaju ?? "-";
+    const jenis   = surat.jenis ?? "-";
+    const status  = surat.status ?? "-";
+
+    let tgl = "-";
+    if (surat.tanggal) {
+        const conv = new Date(surat.tanggal);
+        tgl = isNaN(conv.getTime()) ? "-" : conv.toLocaleDateString("id-ID");
+    }
+
     const content = `
         <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Guru Pengaju</label>
-                    <div class="text-gray-900">${surat.pengaju}</div>
+                    <div class="text-gray-900">${pengaju}</div>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat</label>
-                    <div class="text-gray-900">${surat.jenis}</div>
+                    <div class="text-gray-900">${jenis}</div>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
-                        ${surat.status === 'Selesai' ? 'bg-green-100 text-green-800' : 
-                          surat.status === 'Diproses' ? 'bg-yellow-100 text-yellow-800' : 
+                        ${status === 'selesai' || status === 'Selesai' ? 'bg-green-100 text-green-800' : 
+                          status === 'diproses' || status === 'Diproses' ? 'bg-yellow-100 text-yellow-800' : 
                           'bg-orange-100 text-orange-800'}">
-                        ${surat.status}
+                        ${status}
                     </span>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengajuan</label>
-                    <div class="text-gray-900">${new Date(surat.tanggal).toLocaleDateString('id-ID')}</div>
+                    <div class="text-gray-900">${tgl}</div>
                 </div>
+
             </div>
             
             <div class="pt-4 border-t border-gray-200">
                 <div class="flex justify-end gap-3">
-                    <button onclick="closeDetailModal()" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                    <button onclick="closeDetailModal()" 
+                        class="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300">
                         Tutup
                     </button>
-                    ${surat.status === 'Selesai' ? `
-                    <button onclick="downloadSurat(${surat.id})" class="btn-gradient px-4 py-2 rounded-xl text-white transition-all duration-300">
+
+                    ${status.toLowerCase() === 'selesai' ? `
+                    <button onclick="downloadSurat(${surat.id})" 
+                        class="btn-gradient px-4 py-2 rounded-xl text-white transition-all duration-300">
                         Download Surat
-                    </button>
-                    ` : ''}
+                    </button>` : ``}
+
                 </div>
             </div>
         </div>
@@ -400,6 +432,32 @@ function viewDetail(surat) {
     
     document.getElementById('detailContent').innerHTML = content;
     showDetailModal();
+}
+
+// Helper: build surat object from the clicked button's table row and show detail
+function viewDetailFromButton(btn) {
+    try {
+        const tr = btn.closest('tr');
+        if (!tr) return;
+
+        const surat = {
+            pengaju: tr.dataset.pengaju ?? '-',
+            jenis: tr.dataset.jenis ?? '-',
+            status: tr.dataset.status ?? '-',
+            tanggal: tr.dataset.tanggal ?? null,
+            // try to extract id_surat from status badge id attribute (status-<id>)
+            id: (() => {
+                const badge = tr.querySelector('[id^="status-"]');
+                if (!badge) return null;
+                const parts = badge.id.split('-');
+                return parts.length > 1 ? parts[1] : null;
+            })()
+        };
+
+        viewDetail(surat);
+    } catch (e) {
+        console.error('viewDetailFromButton error', e);
+    }
 }
 
 function showDetailModal() {

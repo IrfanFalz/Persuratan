@@ -109,6 +109,9 @@
         </nav>
 
         <div class="w-full max-w-none sm:max-w-4xl mx-auto py-4 sm:py-6 lg:py-8 px-3 sm:px-4 md:px-6 lg:px-8">
+            @php
+                $lt = in_array($letter_type, ['spt', 'surat-perintah-tugas']) ? 'spt' : (in_array($letter_type, ['dispensasi', 'surat-dispensasi']) ? 'dispensasi' : $letter_type);
+            @endphp
             @if($success_message)
                 <div class="mb-4 sm:mb-6 bg-green-50 border border-green-200 text-green-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg">
                     <div class="flex items-start space-x-3">
@@ -144,7 +147,9 @@
             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
                 <form method="POST" action="{{ route('surat.store') }}" class="space-y-6" enctype="multipart/form-data">
                     @csrf
-                    <input type="hidden" name="jenis" value="{{ $letter_type === 'surat-perintah-tugas' ? 'spt' : ($letter_type === 'surat-dispensasi' ? 'dispensasi' : '') }}">
+                    <input type="hidden" name="id_template" 
+                        value="{{ $lt === 'spt' ? 1 : ($lt === 'dispensasi' ? 3 : '') }}">
+                    <input type="hidden" name="jenis" value="{{ $lt === 'spt' ? 'spt' : ($lt === 'dispensasi' ? 'dispensasi' : '') }}">
 
                     <!-- Data Pemohon -->
                     <div class="border-b border-gray-200 pb-6">
@@ -193,7 +198,7 @@
                     </div>
 
                     <!-- FORM SURAT PERINTAH TUGAS -->
-                    @if($letter_type === 'surat-perintah-tugas')
+                    @if($lt === 'spt')
                         <div class="border-b border-gray-200 pb-6">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-briefcase text-green-600 mr-3 flex-shrink-0"></i>
@@ -269,7 +274,7 @@
 
 
                     <!-- FORM SURAT DISPENSASI -->
-                    @if($letter_type === 'surat-dispensasi')
+                    @if($lt === 'dispensasi')
                         <div class="border-b border-gray-200 pb-6">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-calendar-times text-orange-600 mr-3 flex-shrink-0"></i>
@@ -314,23 +319,25 @@
                                     <h4 class="text-sm font-medium text-gray-700">Data Siswa (Nama, NISN, Kelas)</h4>
 
                                     <div id="siswa-dispensasi-container" class="space-y-4">
+
                                         <div class="siswa-row space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
-                                            <div class="space-y-1">
-                                                <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                                                <input type="text" name="nama_siswa[]" placeholder="Masukkan nama siswa..." required 
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
-                                            </div>
+                                                <div class="space-y-1 relative">
+                                                    <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
+                                                    <input type="text" name="nama_siswa[]" value="{{ old('nama_siswa.0') }}" placeholder="Masukkan nama siswa..." required 
+                                                        class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base siswa-nama-input">
+                                                    <div class="siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
+                                                </div>
 
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">NISN</label>
-                                                <input type="text" name="nisn[]" placeholder="Masukkan NISN..." required 
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="nisn[]" value="{{ old('nisn.0') }}" placeholder="Masukkan NISN..." required 
+                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base siswa-nisn-input">
                                             </div>
 
                                             <div class="space-y-1">
                                                 <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                                                <input type="text" name="kelas_siswa[]" placeholder="Masukkan kelas..." required 
-                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                                                <input type="text" name="kelas_siswa[]" value="{{ old('kelas_siswa.0') }}" placeholder="Masukkan kelas..." required 
+                                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base siswa-kelas-input">
                                             </div>
                                         </div>
                                     </div>
@@ -352,7 +359,7 @@
 
                         <div class="space-y-4">
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Upload Dokumen (Opsional)@if($letter_type === 'surat-perintah-tugas') - Termasuk Bukti Undangan @endif</label>
+                                <label class="block text-sm font-medium text-gray-700">Upload Dokumen (Opsional)@if($lt === 'spt') - Termasuk Bukti Undangan @endif</label>
 
                                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 transition duration-200">
                                     <i class="fas fa-cloud-upload-alt text-2xl sm:text-4xl text-gray-400 mb-2 sm:mb-4"></i>
@@ -427,7 +434,6 @@
                 </div>
             </div>
         </div>
-
         <script>
             // File upload preview
 document.getElementById('file-upload').addEventListener('change', function(e) {
@@ -493,8 +499,13 @@ function setupAutocompleteForExisting() {
         if (dropdown) setupSingleAutocomplete(input, dropdown, nipInput, guruData, 'guru');
     });
 
-    // Surat Dispensasi - TIDAK ADA AUTOCOMPLETE LAGI (Manual Input)
-    // Code ini dihapus karena sekarang manual input
+    // Surat Dispensasi - Enable autocomplete for siswa name inputs
+    document.querySelectorAll('.siswa-row input[name="nama_siswa[]"]').forEach(input => {
+        const dropdown = input.parentElement.querySelector('.siswa-dropdown');
+        const nisnInput = input.closest('.siswa-row').querySelector('input[name="nisn[]"]');
+        const kelasInput = input.closest('.siswa-row').querySelector('input[name="kelas_siswa[]"]');
+        if (dropdown) setupSingleAutocomplete(input, dropdown, { nisn: nisnInput, kelas: kelasInput }, siswaData, 'siswa');
+    });
 
     // Surat Panggilan Ortu - Guru Ditemui
     document.querySelectorAll('.guru-ditemui-input').forEach(input => {
@@ -591,7 +602,7 @@ function showAutocompleteDropdown(dropdown, suggestions, input, secondaryInput, 
     dropdown.innerHTML = '';
     dropdown.classList.remove('hidden');
     
-    suggestions.forEach(item => {
+        suggestions.forEach(item => {
         const div = document.createElement('div');
         div.className = 'px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0';
         
@@ -618,8 +629,13 @@ function showAutocompleteDropdown(dropdown, suggestions, input, secondaryInput, 
                 <div class="text-sm text-gray-600">${item.kelas}</div>
             `;
         }
-        
-        div.onclick = () => selectAutocompleteItem(item, input, dropdown, secondaryInput, type);
+
+        // Use mousedown to avoid input blur hiding the dropdown before click fires
+        div.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            selectAutocompleteItem(item, input, dropdown, secondaryInput, type);
+        });
+
         dropdown.appendChild(div);
     });
 }
@@ -685,8 +701,19 @@ function setupAutocompleteForNewRow(newRow, type) {
             setupSingleAutocomplete(namaInput, dropdown, nipInput, guruData, 'guru');
         }
     } else if (type === 'siswa') {
-        // TIDAK ADA SETUP AUTOCOMPLETE LAGI - Manual Input Only
-        // Function ini tidak perlu melakukan apa-apa untuk siswa karena sekarang manual
+        // Setup autocomplete for siswa row: create dropdown and wire selection to nisn & kelas
+        const namaInput = newRow.querySelector('input[name="nama_siswa[]"]');
+        const nisnInput = newRow.querySelector('input[name="nisn[]"]');
+        const kelasInput = newRow.querySelector('input[name="kelas_siswa[]"]');
+        if (namaInput) {
+            namaInput.classList.add('siswa-nama-input');
+            namaInput.setAttribute('autocomplete', 'off');
+            namaInput.parentElement.style.position = 'relative';
+            const dropdown = document.createElement('div');
+            dropdown.className = 'siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto';
+            namaInput.parentElement.appendChild(dropdown);
+            setupSingleAutocomplete(namaInput, dropdown, { nisn: nisnInput, kelas: kelasInput }, siswaData, 'siswa');
+        }
     } else if (type === 'guru-ditemui') {
         const namaInput = newRow.querySelector('input[name="guru_ditemui[]"]');
         if (namaInput) {
@@ -733,12 +760,12 @@ if (addGuruBtn) {
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">Nama Guru</label>
                 <div class="relative">
-                    <input type="text" name="nama_guru[]" placeholder="Ketik nama guru..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                    <input type="text" name="nama_guru[]" placeholder="Ketik nama guru..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg guru-nama-input focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                 </div>
             </div>
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">NIP</label>
-                <input type="text" name="nip_guru[]" placeholder="NIP" required class="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm sm:text-base">
+                <input type="text" name="nip_guru[]" placeholder="NIP" required readonly class="w-full px-3 py-3 border border-gray-300 rounded-lg guru-nip-input bg-gray-50 text-sm sm:text-base">
             </div>
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">Keterangan</label>
@@ -773,17 +800,18 @@ if (addSiswaDispensasiBtn) {
         const newRow = document.createElement('div');
         newRow.classList.add('siswa-row', 'space-y-3', 'sm:space-y-0', 'sm:grid', 'sm:grid-cols-3', 'sm:gap-4', 'p-4', 'bg-gray-50', 'rounded-lg');
         newRow.innerHTML = `
-            <div class="space-y-1">
+            <div class="space-y-1 relative">
                 <label class="block text-xs text-gray-600 sm:hidden">Nama Siswa</label>
-                <input type="text" name="nama[]" placeholder="Masukkan nama siswa..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                <input type="text" name="nama_siswa[]" placeholder="Masukkan nama siswa..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base siswa-nama-input">
+                <div class="siswa-dropdown hidden absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
             </div>
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">NISN</label>
-                <input type="text" name="nisn[]" placeholder="Masukkan NISN..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                <input type="text" name="nisn[]" placeholder="Masukkan NISN..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base siswa-nisn-input">
             </div>
             <div class="space-y-1">
                 <label class="block text-xs text-gray-600 sm:hidden">Kelas</label>
-                <input type="text" name="kelas[]" placeholder="Masukkan kelas..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                <input type="text" name="kelas_siswa[]" placeholder="Masukkan kelas..." required class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base siswa-kelas-input">
             </div>
             <div class="sm:col-span-3 flex justify-end">
                 <button type="button" class="remove-row text-red-600 hover:text-red-800 px-3 py-1 text-sm">
@@ -793,7 +821,8 @@ if (addSiswaDispensasiBtn) {
         `;
         siswaDispensasiContainer.appendChild(newRow);
         
-        // TIDAK ADA SETUP AUTOCOMPLETE - Full manual input
+        // Setup autocomplete for the new siswa row
+        setupAutocompleteForNewRow(newRow, 'siswa');
         
         // Add remove functionality
         const removeBtn = newRow.querySelector('.remove-row');
@@ -900,7 +929,8 @@ if (document.getElementById('guru-modal')) {
                 <div class="font-medium text-gray-900">${guru.nama}</div>
                 <div class="text-sm text-gray-600">${guru.nip}</div>
             `;
-            item.onclick = () => selectGuru(guru);
+            // use mousedown so selection works reliably on touch/blur
+            item.addEventListener('mousedown', function(e){ e.preventDefault(); selectGuru(guru); });
             container.appendChild(item);
         });
     }
@@ -1005,6 +1035,59 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         });
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Global data
+    let guruData = [], siswaData = [];
+    Promise.all([fetch('/guru-data').then(r=>r.json()), fetch('/siswa-data').then(r=>r.json())])
+        .then(([guru, siswa]) => { guruData = guru; siswaData = siswa; })
+        .catch(()=>{ guruData=[]; siswaData=[]; });
+
+    // Tambah Guru (SPT)
+    const addGuruBtn = document.getElementById('add-guru');
+    const guruContainer = document.getElementById('guru-container');
+    if (addGuruBtn) {
+        addGuruBtn.addEventListener('click', function() {
+            const row = document.createElement('div');
+            row.className = 'guru-row ...';
+            row.innerHTML = `
+                ... // isi input nama_guru, nip_guru, keterangan_guru, tombol hapus
+            `;
+            guruContainer.appendChild(row);
+            setupAutocompleteForNewRow(row, 'guru');
+            row.querySelector('.remove-row').addEventListener('click', ()=>row.remove());
+        });
+    }
+
+    // Tambah Siswa (Dispensasi)
+    const addSiswaBtn = document.getElementById('add-siswa-dispensasi');
+    const siswaContainer = document.getElementById('siswa-dispensasi-container');
+    if (addSiswaBtn) {
+        addSiswaBtn.addEventListener('click', function() {
+            const row = document.createElement('div');
+            row.className = 'siswa-row ...';
+            row.innerHTML = `
+                ... // isi input nama_siswa, nisn, kelas, tombol hapus
+            `;
+            siswaContainer.appendChild(row);
+            row.querySelector('.remove-row').addEventListener('click', ()=>row.remove());
+        });
+    }
+
+    // Event delegation remove row
+    document.addEventListener('click', function(e){
+        if(e.target.closest('.remove-row')) {
+            e.target.closest('.guru-row, .siswa-row, .guru-ditemui-row, .siswa-ortu-row')?.remove();
+        }
+    });
+
+    // Hide dropdown klik di luar
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.guru-dropdown, .siswa-ortu-dropdown').forEach(dd=>{
+            if (!dd.contains(e.target) && !dd.previousElementSibling.contains(e.target)) dd.classList.add('hidden');
+        });
+    });
+});
 
 // Hide dropdown saat klik di luar untuk semua dropdown
 document.addEventListener('click', function(e) {
