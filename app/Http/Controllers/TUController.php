@@ -223,7 +223,7 @@ class TUController extends Controller
                 if (file_exists($candidate)) {
                     \Log::debug('TU::buildKopHtml: found file at candidate', ['candidate' => $candidate]);
                     if ($preview) {
-                        return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/'.$trim).'" style="max-width:95%;height:auto;max-height:220px;display:block;margin:0 auto;"></div>';
+                        return '<div class="kop" style="text-align:center;margin-bottom:12px;margin-top:0;"><img src="'.asset('storage/'.$trim).'" style="max-width:95%;height:auto;max-height:220px;display:block;margin:0 auto;"></div>';
                     }
                     // For PDF generation, embed the image as base64 so Dompdf includes it reliably
                     try {
@@ -231,10 +231,10 @@ class TUController extends Controller
                         $mime = function_exists('mime_content_type') ? mime_content_type($candidate) : 'image/png';
                         $b64 = base64_encode($bin);
                         $dataUri = 'data:'.$mime.';base64,'.$b64;
-                        return '<div style="text-align:center;margin-bottom:12px;"><img src="'.e($dataUri).'" style="width:100%;height:auto;"></div>';
+                        return '<div class="kop" style="text-align:center;margin-bottom:8px;margin-top:0;"><img src="'.e($dataUri).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
                     } catch (\Exception $ex) {
                         \Log::warning('TU::buildKopHtml: failed to embed image, falling back to asset', ['candidate' => $candidate, 'error' => $ex->getMessage()]);
-                        return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/'.$trim).'" style="width:100%;height:auto;"></div>';
+                        return '<div class="kop" style="text-align:center;margin-bottom:8px;margin-top:0;"><img src="'.asset('storage/'.$trim).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
                     }
                 }
         $candidate2 = storage_path('app/public/templates_image/'.$trim);
@@ -242,17 +242,17 @@ class TUController extends Controller
         if (file_exists($candidate2)) {
             \Log::debug('TU::buildKopHtml: found file at candidate2', ['candidate2' => $candidate2]);
             if ($preview) {
-                return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/templates_image/'.$trim).'" style="max-width:95%;height:auto;max-height:220px;display:block;margin:0 auto;"></div>';
+                return '<div class="kop" style="text-align:center;margin-bottom:12px;margin-top:0;"><img src="'.asset('storage/templates_image/'.$trim).'" style="max-width:95%;height:auto;max-height:220px;display:block;margin:0 auto;"></div>';
             }
             try {
                 $bin = file_get_contents($candidate2);
                 $mime = function_exists('mime_content_type') ? mime_content_type($candidate2) : 'image/png';
                 $b64 = base64_encode($bin);
                 $dataUri = 'data:'.$mime.';base64,'.$b64;
-                return '<div style="text-align:center;margin-bottom:12px;"><img src="'.e($dataUri).'" style="width:100%;height:auto;"></div>';
+                return '<div class="kop" style="text-align:center;margin-bottom:8px;margin-top:0;"><img src="'.e($dataUri).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
             } catch (\Exception $ex) {
                 \Log::warning('TU::buildKopHtml: failed to embed image candidate2, falling back to asset', ['candidate2' => $candidate2, 'error' => $ex->getMessage()]);
-                return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/templates_image/'.$trim).'" style="width:100%;height:auto;"></div>';
+                return '<div class="kop" style="text-align:center;margin-bottom:8px;margin-top:0;"><img src="'.asset('storage/templates_image/'.$trim).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
             }
         }
         if (stripos($trim, 'templates_image') !== false) {
@@ -263,9 +263,9 @@ class TUController extends Controller
             return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/'.$trim).'" style="width:100%;height:auto;"></div>';
         }
         \Log::debug('TU::buildKopHtml: fallback asset', ['trim' => $trim]);
-        if ($preview) {
-            return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/'.$trim).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
-        }
-        return '<div style="text-align:center;margin-bottom:12px;"><img src="'.asset('storage/'.$trim).'" style="width:100%;height:auto;"></div>';
+            if ($preview) {
+                return '<div class="kop" style="text-align:center;margin-bottom:12px;margin-top:0;"><img src="'.asset('storage/'.$trim).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
+            }
+        return '<div class="kop" style="text-align:center;margin-bottom:8px;margin-top:0;"><img src="'.asset('storage/'.$trim).'" style="max-width:100%;height:auto;max-height:140px;display:block;margin:0 auto;"></div>';
     }
 }
