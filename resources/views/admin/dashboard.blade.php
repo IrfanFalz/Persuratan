@@ -196,9 +196,9 @@
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Grafik Surat per Bulan</h3>
-                    <p class="text-sm text-muted">Perkembangan pengajuan surat tahun 2024</p>
+                    <p class="text-sm text-muted">Perkembangan pengajuan surat tahun {{ date('Y') }}</p>
                 </div>
-                <div class="text-sm bg-gray-50 px-3 py-1 rounded-lg text-muted">Tahun 2024</div>
+                <div class="text-sm bg-gray-50 px-3 py-1 rounded-lg text-muted">Tahun {{ date('Y') }}</div>
             </div>
             <div class="chart-container">
                 <canvas id="suratChart" class="w-full h-full"></canvas>

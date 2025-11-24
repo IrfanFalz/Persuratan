@@ -63,10 +63,14 @@
                     <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="flex justify-center space-x-2">
 
-                            <!-- PREVIEW -->
-                            <button onclick='previewTemplate(@json($template))'
-                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
-                                Preview
+                            <!-- PREVIEW (eye) -->
+                            <button onclick="previewTemplateById({{ $template->id }})"
+                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm inline-flex items-center justify-center"
+                                title="Preview">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
                             </button>
 
                             <!-- EDIT -->
@@ -222,6 +226,28 @@ function previewTemplate(template) {
 
     document.getElementById('previewContent').innerHTML = html;
     openModal('previewModal');
+}
+
+// Fetch preview via server (useful when not embedding full template JSON in page)
+function previewTemplateById(id) {
+    const previewBase = "{{ url('/admin/template-surat') }}";
+    const url = previewBase + '/' + id + '/preview';
+
+    fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch template preview');
+        return res.json();
+    })
+    .then(template => {
+        // reuse existing renderer
+        previewTemplate(template);
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Gagal memuat preview template.');
+    });
 }
 
 // ================= EDIT ==================

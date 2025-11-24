@@ -152,6 +152,9 @@
             <table class="w-full" id="historyTable">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                            <input type="checkbox" id="selectAll" title="Pilih semua" />
+                        </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">No</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Guru Pengaju</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Jenis Surat</th>
@@ -184,6 +187,9 @@
                             data-jenis="{{ $surat->template->nama ?? '-' }}"
                             data-status="{{ $statusKey }}"
                             data-tanggal="{{ $surat->dibuat_pada }}">
+                            <td class="px-6 py-4">
+                                <input type="checkbox" class="rowCheckbox" data-id="{{ $surat->id_surat }}" />
+                            </td>
                             {{-- Nomor urut --}}
                             <td class="px-6 py-4 text-sm text-gray-600">
                                 {{ ($pagination['current_page'] - 1) * $pagination['per_page'] + $index + 1 }}
@@ -512,8 +518,63 @@ function downloadSurat(id) {
 }
 
 function exportData() {
-    // Simulasi export
-    showNotification('Data berhasil diexport!', 'success');
+    const csrf = '{{ csrf_token() }}';
+    const checkboxes = Array.from(document.querySelectorAll('.rowCheckbox'));
+    const selected = checkboxes.filter(cb => cb.checked).map(cb => cb.dataset.id);
+
+    // Determine export mode:
+    // - if user selected rows: export those (require >=5)
+    // - if no selection: export ALL records across pages (require total >=5)
+    const totalCountEl = document.getElementById('totalCount');
+    const totalCount = totalCountEl ? parseInt(totalCountEl.textContent || '0', 10) : 0;
+
+    let payload = {};
+
+    if (selected.length > 0) {
+        if (selected.length < 5) {
+            showNotification('Pilih minimal 5 surat untuk diekspor.', 'error');
+            return;
+        }
+        payload.ids = selected;
+    } else {
+        if (totalCount < 5) {
+            showNotification('Terdapat kurang dari 5 surat total. Pilih minimal 5 surat atau tambahkan data.', 'error');
+            return;
+        }
+        // Export all records across pages
+        payload.export_all = true;
+    }
+
+    // POST to server and download CSV
+    fetch('{{ route('admin.history-surat.export') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'text/csv'
+        },
+        body: JSON.stringify(payload)
+    }).then(async res => {
+        if (!res.ok) {
+            const txt = await res.text();
+            showNotification('Gagal mengekspor: ' + txt, 'error');
+            return;
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const filename = `history_surat_export_${new Date().toISOString().slice(0,10)}.csv`;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showNotification('Export berhasil, file mulai diunduh.', 'success');
+    }).catch(err => {
+        console.error(err);
+        showNotification('Terjadi kesalahan saat mengekspor.', 'error');
+    });
 }
 
 function showNotification(message, type) {
@@ -543,6 +604,24 @@ document.getElementById('detailModal').addEventListener('click', function(e) {
         closeDetailModal();
     }
 });
+
+// Select all checkbox handling
+const selectAllEl = document.getElementById('selectAll');
+if (selectAllEl) {
+    selectAllEl.addEventListener('change', function() {
+        const checked = this.checked;
+        document.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = checked);
+        filterTable(); // update visible count
+    });
+    // keep header selectAll in sync when individual checkboxes change
+    document.querySelectorAll('.rowCheckbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const all = Array.from(document.querySelectorAll('.rowCheckbox'));
+            selectAllEl.checked = all.length && all.every(x => x.checked);
+            filterTable();
+        });
+    });
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/pusher-js@8.2.0/dist/web/pusher.min.js"></script>
 <script type="module">

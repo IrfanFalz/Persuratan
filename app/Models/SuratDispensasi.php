@@ -37,4 +37,10 @@ class SuratDispensasi extends Model
     {
         return $this->hasMany(DetailDispensasi::class, 'id_sd', 'id_sd');
     }
+
+    // Backwards-compatible alias: beberapa controller menamai relasi detailDispensasi
+    public function detailDispensasi()
+    {
+        return $this->hasMany(DetailDispensasi::class, 'id_sd', 'id_sd');
+    }
 }

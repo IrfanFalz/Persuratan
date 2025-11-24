@@ -548,15 +548,6 @@
             </div>
 
                 
-                <div class="notification bg-blue-50 border-blue-500">
-                    <div class="flex items-start">
-                        <i class="fas fa-file-alt text-blue-500 mr-3 mt-1 flex-shrink-0"></i>
-                        <div class="min-w-0 flex-1">
-                            <p class="font-medium text-gray-800 text-sm sm:text-base">Surat Tugas telah selesai diproses TU</p>
-                            <p class="text-xs sm:text-sm text-gray-600">Silakan ambil di ruang TU. 26 Agustus 2025, 09:15</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -759,28 +750,144 @@
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
     <script>
-        Echo.channel('surat-status')
-            .listen('SuratStatusUpdated', (e) => {
-                console.log('Surat diupdate:', e.surat);
+            Echo.channel('surat-status')
+                .listen('SuratStatusUpdated', (e) => {
+                    console.log('Surat diupdate (raw):', e);
 
-                const suratId = e.surat.id_surat;
-                const newStatus = e.surat.status_berkas;
+                    // Normalize payload: some broadcasters send { surat: {...} }, others send { id_surat, status_berkas }
+                    const payload = e.surat ? e.surat : e;
 
-                const row = document.querySelector(`[data-surat-id="${suratId}"]`);
-                if (row) {
-                    const statusCell = row.querySelector('.status-cell');
-                    const progressDots = row.querySelectorAll('.progress-dot');
+                    const suratId = payload.id_surat || payload.id || (payload.surat && payload.surat.id_surat);
+                    const rawStatus = (payload.status_berkas || payload.status || payload.status_berkas || '').toString().toLowerCase();
 
-                    if (newStatus === 'approve') {
-                        statusCell.innerHTML = `<span class="status-approved"><i class="fas fa-check mr-1"></i>Disetujui</span>`;
-                        progressDots.forEach(dot => dot.classList.add('bg-green-500'));
-                    } else if (newStatus === 'decline') {
-                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times mr-1"></i>Ditolak</span>`;
-                    } else {
-                        statusCell.innerHTML = `<span class="status-pending"><i class="fas fa-clock mr-1"></i>Menunggu</span>`;
+                    // Helper to update a container's status/progress visuals
+                    function applyStatusToContainer(container, status) {
+                        if (!container) return;
+
+                        // Update status label if present
+                        const statusCell = container.querySelector('.status-cell') || container.querySelector('#modalStatus') || null;
+                        if (statusCell) {
+                            if (['approve','approved','disetujui'].includes(status)) {
+                                statusCell.innerHTML = `<span class="status-approved"><i class="fas fa-check mr-1"></i>Disetujui</span>`;
+                            } else if (['decline','ditolak'].includes(status)) {
+                                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times mr-1"></i>Ditolak</span>`;
+                            } else if (['done','completed','selesai'].includes(status)) {
+                                statusCell.innerHTML = `<span class="status-approved"><i class="fas fa-check mr-1"></i>Selesai</span>`;
+                            } else {
+                                statusCell.innerHTML = `<span class="status-pending"><i class="fas fa-clock mr-1"></i>Menunggu</span>`;
+                            }
+                        }
+
+                        // Update progress dots/lines
+                        const dots = container.querySelectorAll('.progress-dot');
+                        const lines = container.querySelectorAll('.progress-line');
+
+                        if (['done','completed','selesai'].includes(status)) {
+                            dots.forEach(d => { d.classList.remove('bg-gray-300'); d.classList.add('bg-green-500'); });
+                            lines.forEach(l => { l.classList.remove('bg-gray-300'); l.classList.add('bg-green-300'); });
+                        } else if (['approve','approved','disetujui'].includes(status)) {
+                            // mark first two steps complete
+                            dots.forEach((d, i) => { if (i < 2) { d.classList.remove('bg-gray-300'); d.classList.add('bg-green-500'); } else { d.classList.remove('bg-green-500'); d.classList.add('bg-gray-300'); } });
+                            lines.forEach((l, i) => { if (i < 1) { l.classList.remove('bg-gray-300'); l.classList.add('bg-green-300'); } else { l.classList.remove('bg-green-300'); l.classList.add('bg-gray-300'); } });
+                        } else if (['decline','ditolak'].includes(status)) {
+                            dots.forEach(d => { d.classList.remove('bg-green-500'); d.classList.add('bg-gray-300'); });
+                            lines.forEach(l => { l.classList.remove('bg-green-300'); l.classList.add('bg-gray-300'); });
+                        } else {
+                            // pending
+                            dots.forEach(d => { d.classList.remove('bg-green-500'); d.classList.add('bg-gray-300'); });
+                            lines.forEach(l => { l.classList.remove('bg-green-300'); l.classList.add('bg-gray-300'); });
+                        }
                     }
-                }
-            });
+
+                    if (!suratId) return;
+
+                    // 1) Try a direct #status-{id} element (used in some views)
+                    const directStatusEl = document.getElementById(`status-${suratId}`);
+                    if (directStatusEl) {
+                        const statusText = rawStatus;
+                        directStatusEl.textContent = statusText;
+                    }
+
+                    // 2) Find buttons that open the letter (viewLetter) and update their parent card/row
+                    const triggers = Array.from(document.querySelectorAll(`[onclick*="viewLetter(${suratId})"],[onclick*='viewLetter(${suratId})']`));
+                    if (triggers.length > 0) {
+                        triggers.forEach(t => {
+                            const container = t.closest('tr') || t.closest('.bg-gray-50') || t.closest('.mobile-card > div') || t.closest('.card') || document.body;
+                            applyStatusToContainer(container, rawStatus);
+                        });
+
+                // Also listen on the alternate channel name used by some broadcasters
+                Echo.channel('surat.status')
+                        .listen('SuratStatusUpdated', (e) => {
+                            console.log('Surat diupdate via surat.status (raw):', e);
+                            const payload = e.surat ? e.surat : e;
+                            const suratId = payload.id_surat || payload.id || (payload.surat && payload.surat.id_surat);
+                            const rawStatus = (payload.status_berkas || payload.status || payload.status_berkas || '').toString().toLowerCase();
+
+                            function applyStatusToContainer(container, status) {
+                                if (!container) return;
+                                const statusCell = container.querySelector('.status-cell') || container.querySelector('#modalStatus') || null;
+                                if (statusCell) {
+                                    if (['approve','approved','disetujui'].includes(status)) {
+                                        statusCell.innerHTML = `<span class="status-approved"><i class="fas fa-check mr-1"></i>Disetujui</span>`;
+                                    } else if (['decline','ditolak'].includes(status)) {
+                                        statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times mr-1"></i>Ditolak</span>`;
+                                    } else if (['done','completed','selesai'].includes(status)) {
+                                        statusCell.innerHTML = `<span class="status-approved"><i class="fas fa-check mr-1"></i>Selesai</span>`;
+                                    } else {
+                                        statusCell.innerHTML = `<span class="status-pending"><i class="fas fa-clock mr-1"></i>Menunggu</span>`;
+                                    }
+                                }
+
+                                const dots = container.querySelectorAll('.progress-dot');
+                                const lines = container.querySelectorAll('.progress-line');
+
+                                if (['done','completed','selesai'].includes(status)) {
+                                    dots.forEach(d => { d.classList.remove('bg-gray-300'); d.classList.add('bg-green-500'); });
+                                    lines.forEach(l => { l.classList.remove('bg-gray-300'); l.classList.add('bg-green-300'); });
+                                } else if (['approve','approved','disetujui'].includes(status)) {
+                                    dots.forEach((d, i) => { if (i < 2) { d.classList.remove('bg-gray-300'); d.classList.add('bg-green-500'); } else { d.classList.remove('bg-green-500'); d.classList.add('bg-gray-300'); } });
+                                    lines.forEach((l, i) => { if (i < 1) { l.classList.remove('bg-gray-300'); l.classList.add('bg-green-300'); } else { l.classList.remove('bg-green-300'); l.classList.add('bg-gray-300'); } });
+                                } else if (['decline','ditolak'].includes(status)) {
+                                    dots.forEach(d => { d.classList.remove('bg-green-500'); d.classList.add('bg-gray-300'); });
+                                    lines.forEach(l => { l.classList.remove('bg-green-300'); l.classList.add('bg-gray-300'); });
+                                } else {
+                                    dots.forEach(d => { d.classList.remove('bg-green-500'); d.classList.add('bg-gray-300'); });
+                                    lines.forEach(l => { l.classList.remove('bg-green-300'); l.classList.add('bg-gray-300'); });
+                                }
+                            }
+
+                            if (!suratId) return;
+
+                            const directStatusEl = document.getElementById(`status-${suratId}`);
+                            if (directStatusEl) {
+                                const statusText = rawStatus;
+                                directStatusEl.textContent = statusText;
+                            }
+
+                            const triggers = Array.from(document.querySelectorAll(`[onclick*="viewLetter(${suratId})"],[onclick*='viewLetter(${suratId})']`));
+                            if (triggers.length > 0) {
+                                triggers.forEach(t => {
+                                    const container = t.closest('tr') || t.closest('.bg-gray-50') || t.closest('.mobile-card > div') || t.closest('.card') || document.body;
+                                    applyStatusToContainer(container, rawStatus);
+                                });
+                                return;
+                            }
+
+                            const row = document.querySelector(`[data-surat-id="${suratId}"]`);
+                            if (row) {
+                                applyStatusToContainer(row, rawStatus);
+                            }
+                        });
+                        return;
+                    }
+
+                    // 3) As a fallback, try to locate any row with data-surat-id attribute
+                    const row = document.querySelector(`[data-surat-id="${suratId}"]`);
+                    if (row) {
+                        applyStatusToContainer(row, rawStatus);
+                    }
+                });
     </script>
 </body>
 </html>

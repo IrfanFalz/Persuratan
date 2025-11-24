@@ -56,6 +56,7 @@ Route::middleware(['auth','checkRole:KEPSEK'])->group(function () {
 Route::middleware(['auth','checkRole:ADMIN'])->group(function () {
     Route::get('/dashboard/admin', [DashboardAdminController::class, 'index'])->name('dashboard.admin');
     Route::get('/admin/history-surat', [DashboardAdminController::class, 'historySurat'])->name('admin.history-surat');
+    Route::post('/admin/history-surat/export', [DashboardAdminController::class, 'exportSurat'])->name('admin.history-surat.export');
 
     Route::get('/admin/users', [DashboardAdminController::class, 'usersIndex'])->name('admin.users.index');
     Route::post('/admin/users', [DashboardAdminController::class, 'usersStore'])->name('admin.users.store');

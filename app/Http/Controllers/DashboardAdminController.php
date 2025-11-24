@@ -248,6 +248,59 @@ class DashboardAdminController extends Controller
         ));
     }
 
+    public function exportSurat(\Illuminate\Http\Request $req)
+    {
+        $exportAll = (bool) $req->input('export_all', false);
+        $ids = $req->input('ids', []);
+
+        if ($exportAll) {
+            $surats = Surat::with(['pengguna', 'template'])
+                ->orderBy('id_surat')
+                ->get();
+
+            if ($surats->count() < 5) {
+                return response()->json(['message' => 'Terdapat kurang dari 5 surat untuk diekspor.'], 422);
+            }
+        } else {
+            if (!is_array($ids) || count($ids) < 5) {
+                return response()->json(['message' => 'Pilih minimal 5 surat untuk diekspor.'], 422);
+            }
+
+            $surats = Surat::with(['pengguna', 'template'])
+                ->whereIn('id_surat', $ids)
+                ->orderBy('id_surat')
+                ->get();
+        }
+
+        $filename = 'history_surat_export_' . date('Ymd_His') . '.csv';
+
+        $callback = function() use ($surats) {
+            $out = fopen('php://output', 'w');
+            // Header
+            fputcsv($out, ['ID Surat', 'Pengaju', 'NIP Pengaju', 'Jenis Surat', 'Status', 'Tanggal Dibuat', 'Nomor Surat']);
+
+            foreach ($surats as $s) {
+                $tgl = $s->dibuat_pada ? \Carbon\Carbon::parse($s->dibuat_pada)->format('Y-m-d H:i:s') : '';
+                fputcsv($out, [
+                    $s->id_surat,
+                    $s->pengguna->nama ?? '',
+                    $s->pengguna->nip ?? '',
+                    $s->template->nama ?? '',
+                    $s->status_berkas ?? '',
+                    $tgl,
+                    $s->nomor_surat ?? '',
+                ]);
+            }
+
+            fclose($out);
+        };
+
+        return response()->streamDownload($callback, $filename, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
     public function kelolaGuru()
     {
         $users = Pengguna::all();

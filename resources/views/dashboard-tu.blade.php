@@ -10,6 +10,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Tata Usaha - Sistem Persuratan</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -200,7 +201,7 @@
                             <div class="flex-1 lg:mr-6">
                                 <!-- Header Section -->
                                 <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-3">
-                                    <div class="flex items-center space-x-3">
+                                    <div class="flex items-start space-x-3">
                                         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
                                             <img src="{{ asset('images/pp.png') }}" 
                                                 alt="Avatar {{ $letter['teacher'] }}" 
@@ -277,16 +278,13 @@
                                         style="cursor: pointer; pointer-events: auto;">
                                     <i class="fas fa-eye mr-2"></i>Preview
                                 </button>
-                                
-                                <!-- Tombol Cetak -->
-                                <form method="POST" action="{{ route('surat.generate', $letter['id']) }}" target="_blank" style="position: relative; z-index: 10;">
-                                    @csrf
-                                    <button type="submit" 
-                                            class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm"
-                                            style="cursor: pointer; pointer-events: auto;">
-                                        <i class="fas fa-print mr-2"></i>Cetak
-                                    </button>
-                                </form>
+
+                                <!-- Tombol Cetak (server-rendered PDF) -->
+                                <button type="button" onclick="fetchGeneratePdf({{ $letter['id'] }})"
+                                        class="w-full lg:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm"
+                                        style="cursor: pointer; pointer-events: auto;">
+                                    <i class="fas fa-print mr-2"></i>Cetak
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -467,11 +465,11 @@
                             <i class="fas fa-briefcase text-blue-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
                             <span class="font-medium text-sm sm:text-base truncate">Surat Perintah Tugas</span>
                         </div>
-                        <div class="flex space-x-1 sm:space-x-2 ml-2">
-                            <button class="text-green-600 hover:text-green-800 p-1">
-                                <i class="fas fa-eye text-xs sm:text-sm"></i>
-                            </button>
-                        </div>
+                            <div class="flex space-x-1 sm:space-x-2 ml-2">
+                                <button class="text-green-600 hover:text-green-800 p-1" onclick="previewTemplateById({{ $template_spt->id ?? 'null' }})" title="Preview Template Surat Perintah Tugas">
+                                    <i class="fas fa-eye text-xs sm:text-sm"></i>
+                                </button>
+                            </div>
                     </div>
                     
                     <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-all">
@@ -480,7 +478,7 @@
                             <span class="font-medium text-sm sm:text-base truncate">Surat Dispensasi</span>
                         </div>
                         <div class="flex space-x-1 sm:space-x-2 ml-2">
-                            <button class="text-green-600 hover:text-green-800 p-1">
+                            <button class="text-green-600 hover:text-green-800 p-1" onclick="previewTemplateById({{ $template_dispensasi->id ?? 'null' }})" title="Preview Template Surat Dispensasi">
                                 <i class="fas fa-eye text-xs sm:text-sm"></i>
                             </button>
                         </div>
@@ -495,45 +493,51 @@
                 </h3>
                 
                 <div class="space-y-3 sm:space-y-4">
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-check text-green-600 text-xs sm:text-sm"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-xs sm:text-sm font-medium text-gray-800">Surat Izin Maya Sari selesai</p>
-                            <p class="text-xs text-gray-500">2 jam yang lalu</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-cogs text-blue-600 text-xs sm:text-sm"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-xs sm:text-sm font-medium text-gray-800">Mulai memproses Surat Tugas Eko</p>
-                            <p class="text-xs text-gray-500">4 jam yang lalu</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-bell text-purple-600 text-xs sm:text-sm"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-xs sm:text-sm font-medium text-gray-800">Notifikasi pengambilan dikirim</p>
-                            <p class="text-xs text-gray-500">Kemarin, 16:30</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-file-alt text-indigo-600 text-xs sm:text-sm"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-xs sm:text-sm font-medium text-gray-800">Template Surat Keterangan diupdate</p>
-                            <p class="text-xs text-gray-500">Kemarin, 14:20</p>
-                        </div>
-                    </div>
+                    @if(!empty($recent_activities) && count($recent_activities) > 0)
+                        @foreach($recent_activities as $activity)
+                            @php
+                                $icon = 'fa-bell';
+                                $bg = 'bg-indigo-100';
+                                $iconColor = 'text-indigo-600';
+                                // Build a clearer title: Teacher — Type
+                                $teacher = $activity['teacher'] ?? '';
+                                $type = $activity['type'] ?? '';
+                                $shortReason = $activity['reason'] ?? '';
+                                $title = trim(($teacher ? $teacher . ' — ' : '') . $type);
+                                try {
+                                    $timeAgo = \Carbon\Carbon::parse($activity['date'])->diffForHumans();
+                                } catch (\Exception $e) {
+                                    $timeAgo = $activity['date'] ?? '-';
+                                }
+                                $status = strtolower($activity['status'] ?? '');
+                                if (in_array($status, ['approved','disetujui','accepted'])) {
+                                    $icon = 'fa-check'; $bg='bg-green-100'; $iconColor='text-green-600';
+                                } elseif (in_array($status, ['pending','diproses','processing'])) {
+                                    $icon = 'fa-cogs'; $bg='bg-blue-100'; $iconColor='text-blue-600';
+                                }
+                                $suratId = $activity['surat_id'] ?? null;
+                            @endphp
+
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 {{ $bg }} rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas {{ $icon }} {{ $iconColor }} text-xs sm:text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs sm:text-sm font-medium text-gray-800">
+                                        @if($suratId)
+                                            <a href="#" onclick="openPreviewModal({{ $suratId }}); return false;" class="hover:underline">{{ $title }}</a>
+                                        @else
+                                            {{ $title }}
+                                        @endif
+                                        <span class="ml-2 inline-block px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700">{{ ucfirst($activity['status'] ?? '') }}</span>
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{ \Illuminate\Support\Str::limit($shortReason, 80) }} • {{ $timeAgo }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="text-sm text-gray-500">Tidak ada aktivitas terbaru</div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -555,12 +559,12 @@
                         <!-- Content will be populated by JavaScript -->
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-4 border-t border-gray-200">
+                    <div id="previewModalFooter" class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-4 border-t border-gray-200">
                         <button onclick="closeModal('previewModal')" 
                                 class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all text-sm sm:text-base">
                             Tutup
                         </button>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base">
+                        <button id="modalPrintBtn" type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base">
                             <i class="fas fa-print mr-1"></i>Cetak
                         </button>
                     </div>
@@ -581,6 +585,15 @@
     // Data surat dari controller
     const letterData = @json($approved_letters);
     const completedLetterData = @json($completed_letters_indexed ?? []);
+
+    // Embed templates so TU can preview without calling admin-only routes
+    const templatesById = {};
+    @if(!empty($template_spt))
+        templatesById[{{ $template_spt->id }}] = @json($template_spt);
+    @endif
+    @if(!empty($template_dispensasi))
+        templatesById[{{ $template_dispensasi->id }}] = @json($template_dispensasi);
+    @endif
     
     console.log('Letter data:', letterData);
     console.log('Completed Letter data:', completedLetterData);
@@ -591,26 +604,195 @@
         document.getElementById('loadingSpinner').classList.remove('hidden');
         
         setTimeout(() => {
-            try {
-                const letter = letterData.find(item => item.id == letterId);
-                console.log('Found letter:', letter);
-                
-                if (letter) {
-                    displayLetterDetails(letter);
-                    document.getElementById('previewModal').classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    console.error('Letter not found with ID:', letterId);
-                    alert('Data surat tidak ditemukan');
+                try {
+                    const letter = letterData.find(item => item.id == letterId);
+                    console.log('Found letter:', letter);
+
+                    if (letter) {
+                        // Jika server-side sudah menyediakan rendered_template (isi HTML), tampilkan itu.
+                        if (letter.rendered_template) {
+                            document.getElementById('letterDetailContent').innerHTML = letter.rendered_template;
+                        } else {
+                            displayLetterDetails(letter);
+                        }
+
+                        // Set handler tombol Cetak di modal supaya download tanpa pindah halaman
+                        const printBtn = document.getElementById('modalPrintBtn');
+                        if (printBtn) {
+                            printBtn.onclick = function () { fetchGeneratePdf(letter.id); };
+                        }
+
+                        document.getElementById('previewModal').classList.remove('hidden');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        console.error('Letter not found with ID:', letterId);
+                        alert('Data surat tidak ditemukan');
+                    }
+                } catch (error) {
+                    console.error('Error in openPreviewModal:', error);
+                    alert('Terjadi error saat membuka preview');
                 }
-            } catch (error) {
-                console.error('Error in openPreviewModal:', error);
-                alert('Terjadi error saat membuka preview');
-            }
-            
-            document.getElementById('loadingSpinner').classList.add('hidden');
-        }, 500);
+
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            }, 500);
     }
+
+    // Preview template by template_surat id (used by quick templates section)
+    function previewTemplateById(id) {
+        if (!id) {
+            alert('Template belum tersedia. Silakan tambahkan template di halaman Kelola Template Surat.');
+            return;
+        }
+
+        // If template is embedded on this page, render it directly (no admin fetch)
+        if (templatesById[id]) {
+            const template = templatesById[id];
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            try {
+                let kop = '';
+                if (template.kop_path) {
+                    kop = `<div style="text-align:center;margin-bottom:12px;"><img src="/storage/${template.kop_path}" style="max-width:95%;height:auto;max-height:220px;display:block;margin:0 auto;"></div>`;
+                }
+                const content = document.getElementById('letterDetailContent');
+                content.innerHTML = kop + `<div class="prose max-w-none">${template.isi_template}</div>`;
+
+                const printBtn = document.getElementById('modalPrintBtn');
+                if (printBtn) {
+                    printBtn.onclick = function () { alert('Gunakan halaman Kelola Template untuk mencetak template jika diperlukan.'); };
+                }
+
+                document.getElementById('previewModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } catch (err) {
+                console.error('Error rendering embedded template', err);
+                alert('Gagal memuat preview template.');
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            }
+
+            return;
+        }
+
+        // Fallback: try admin preview route (may be blocked by role middleware)
+        document.getElementById('loadingSpinner').classList.remove('hidden');
+
+        fetch('/admin/template-surat/' + id + '/preview', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => {
+                if (!res.ok) throw new Error('Gagal memuat template');
+                return res.json();
+            })
+            .then(template => {
+                let kop = '';
+                if (template.kop_path) {
+                    kop = `<div style="text-align:center;margin-bottom:12px;"><img src="/storage/${template.kop_path}" style="max-width:95%;height:auto;max-height:220px;display:block;margin:0 auto;"></div>`;
+                }
+
+                const content = document.getElementById('letterDetailContent');
+                content.innerHTML = kop + `<div class="prose max-w-none">${template.isi_template}</div>`;
+
+                const printBtn = document.getElementById('modalPrintBtn');
+                if (printBtn) {
+                    printBtn.onclick = function () { alert('Gunakan halaman Kelola Template untuk mencetak template jika diperlukan.'); };
+                }
+
+                document.getElementById('previewModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Gagal memuat preview template.');
+            })
+            .finally(() => {
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            });
+    }
+
+        // Fetch PDF via AJAX and trigger download without changing page
+        async function fetchGeneratePdf(letterId) {
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                const res = await fetch(`/surat/${letterId}/generate`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/pdf',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                // If not OK, try to get helpful error message (JSON or text)
+                if (!res.ok) {
+                    // Handle common cases quickly
+                    if (res.status === 419) {
+                        alert('Sesi Anda telah kadaluwarsa. Silakan login ulang dan coba lagi.');
+                        return;
+                    }
+
+                    let errMsg = 'Gagal menghasilkan PDF. Periksa log server.';
+                    try {
+                        const data = await res.json();
+                        if (data && data.error) errMsg = data.error;
+                    } catch (jsonErr) {
+                        try {
+                            const txt = await res.text();
+                            if (txt) {
+                                // Trim long HTML responses
+                                errMsg = txt.length > 1000 ? txt.slice(0, 1000) + '...' : txt;
+                            }
+                        } catch (t) {
+                            // ignore
+                        }
+                    }
+                    console.error('Server error while generating PDF:', errMsg);
+                    alert(errMsg);
+                    return;
+                }
+
+                // Validate content-type header to avoid saving HTML/JSON as PDF
+                const contentType = (res.headers.get('content-type') || '').toLowerCase();
+                if (!contentType.startsWith('application/pdf')) {
+                    // Try to parse JSON first
+                    let bodyText = '';
+                    try {
+                        const json = await res.json();
+                        bodyText = json && json.error ? json.error : JSON.stringify(json);
+                    } catch (jerr) {
+                        try {
+                            bodyText = await res.text();
+                        } catch (terr) {
+                            bodyText = 'Server returned non-PDF response';
+                        }
+                    }
+                    console.error('Non-PDF response received when generating PDF:', contentType, bodyText);
+                    alert('Gagal mengunduh PDF: server mengembalikan bukan file PDF.\n\n' + (bodyText || 'Periksa log server untuk detail.'));
+                    return;
+                }
+
+                const blob = await res.blob();
+
+                // Try to get filename from content-disposition
+                const disposition = res.headers.get('content-disposition') || '';
+                let filename = 'surat.pdf';
+                const match = /filename\*=UTF-8''(.+)$/.exec(disposition) || /filename="?([^";]+)"?/.exec(disposition);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Error fetching/generating PDF:', err);
+                alert('Terjadi error saat mengunduh PDF');
+            }
+        }
 
     function displayLetterDetails(letter) {
         const content = document.getElementById('letterDetailContent');
@@ -891,5 +1073,6 @@
     // Smooth scrolling for better UX
     document.documentElement.style.scrollBehavior = 'smooth';
 </script>
+
 </body>
 </html>

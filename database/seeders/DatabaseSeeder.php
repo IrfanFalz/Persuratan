@@ -12,5 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(InitialAdminSeeder::class);
+        // Seeder for default templates
+        $this->call(TemplateSuratSeeder::class);
     }
 }
